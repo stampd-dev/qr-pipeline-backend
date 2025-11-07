@@ -16,6 +16,7 @@ export const handler = async (event: any) => {
   const csvInputs = await getCsvInputs({
     batchId,
     client: s3Client,
+    bucketName,
   });
 
   if (!csvInputs) {
