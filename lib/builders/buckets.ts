@@ -10,16 +10,16 @@ export type QRPBuckets = {
 export const createBuckets = (scope: Construct) => {
   return {
     CsvInput: createBucket({
-      id: "QRP-CsvInput",
+      id: "QRPCsvInput",
       props: {
-        bucketName: "QRP-CsvInput",
+        bucketName: "QRPCsvInput",
       },
       scope,
     }),
     QRBatchOutput: createBucket({
-      id: "QRP-QRBatchOutput",
+      id: "QRPBatchOutput",
       props: {
-        bucketName: "QRP-QRBatchOutput",
+        bucketName: "QRPBatchOutput",
       },
       scope,
     }),
