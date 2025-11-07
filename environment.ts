@@ -1,6 +1,7 @@
 export type Environment = {
   env: string;
   account_id: string;
+  stackName: string;
 };
 
 const getEnv = (key: string): string => {
@@ -15,4 +16,5 @@ const getEnv = (key: string): string => {
 export const environment: Environment = {
   env: getEnv("ENV_NAME"),
   account_id: getEnv("AWS_ACCOUNT_ID"),
+  stackName: getEnv("STACK_NAME"),
 };
