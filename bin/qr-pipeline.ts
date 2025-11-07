@@ -5,7 +5,7 @@ import { QrPipelineStack } from "../lib/qr-pipeline-stack";
 import { environment } from "../environment";
 
 const app = new cdk.App();
-new QrPipelineStack(app, "QrPipelineStack", {
-  stackName: process.env.STACK_NAME || "QrPipelineStack",
+new QrPipelineStack(app, environment.stackName, {
+  stackName: environment.stackName,
   environment: environment,
 });
