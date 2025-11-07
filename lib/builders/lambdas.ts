@@ -53,7 +53,7 @@ export const createLambdas = ({
       props: {
         functionName: "QRP-CreatePresignedCsvUploadUrlLambda",
         handler: "index.handler",
-        entry: "src/handlers/create-presigned-csv-upload-url/index.ts",
+        entry: "src/handlers/create-csv-upload-link/index.ts",
       },
       permissions: {
         buckets: {
@@ -70,7 +70,7 @@ export const createLambdas = ({
       props: {
         functionName: "QRP-ListMetricsByQRCodeLambda",
         handler: "index.handler",
-        entry: "src/handlers/list-metrics-by-qr-code/index.ts",
+        entry: "src/handlers/list-metrics-by-code/index.ts",
       },
       permissions: {
         tables: {
@@ -87,7 +87,7 @@ export const createLambdas = ({
       props: {
         functionName: "QRP-ListQRMetrics",
         handler: "index.handler",
-        entry: "src/handlers/list-qr-metrics/index.ts",
+        entry: "src/handlers/list-all-metrics/index.ts",
       },
       permissions: {
         tables: {
