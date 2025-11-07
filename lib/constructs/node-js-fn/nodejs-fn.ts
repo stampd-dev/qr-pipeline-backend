@@ -1,7 +1,6 @@
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
-import path = require("path");
 import { Duration } from "aws-cdk-lib";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket } from "aws-cdk-lib/aws-s3";
@@ -37,7 +36,7 @@ export const createNodejsFn = ({
 }) => {
   const fn = new NodejsFunction(scope, id, {
     functionName: props.functionName,
-    entry: path.resolve(props.entry),
+    entry: props.entry,
     handler: props.handler,
     runtime: lambda.Runtime.NODEJS_LATEST,
     memorySize: 1024,
