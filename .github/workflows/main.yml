@@ -1,0 +1,70 @@
+name: Deploy Client Services Prod
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ENV_NAME: ${{ secrets.ENV_NAME }}
+  STACK_NAME: ${{ secrets.STACK_NAME }}
+
+permissions:
+  contents: write # <-- required for repository_dispatch
+  id-token: write # you already use OIDC for AWS; keep this
+  actions: read # optional
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Bootstrap (if needed)
+        run: CDK_DEBUG=true npx cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION || true
+
+      - name: Deploy CDK stack
+        run: CDK_DEBUG=true npx cdk deploy $STACK_NAME --context environment=prod --require-approval never --concurrency 3 --tags environment=prod --verbose
+
+      - name: Capture deployed_at timestamp (UTC)
+        id: ts
+        run: echo "ts=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: Notify metrics - prod deploy succeeded
+        if: ${{ env.ENV_NAME == 'prod' }} # or whatever flag you use to identify prod
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          # same-repo dispatch; GITHUB_TOKEN is fine once permissions include contents: write
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: prod-deploy-succeeded # keep this EXACT; metrics workflow listens to it
+          client-payload: |
+            {
+              "to_sha": "${{ github.sha }}",
+              "deployed_at": "${{ steps.ts.outputs.ts }}"
+            }

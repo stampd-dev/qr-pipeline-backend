@@ -1,16 +1,23 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import { Environment } from "../environment";
+import { createBuckets, createTables } from "./constructs";
+import { createLambdas } from "./builders/lambdas";
+import { createApis } from "./builders/apis";
+import { createEndpoints } from "./builders/endpoints";
+
+interface QrPipelineStackProps extends cdk.StackProps {
+  environment: Environment;
+}
 
 export class QrPipelineStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: QrPipelineStackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'QrPipelineQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const buckets = createBuckets(this);
+    const tables = createTables(this);
+    const lambdas = createLambdas({ buckets, tables, scope: this });
+    const apis = createApis(this);
+    createEndpoints({ lambdas, apis });
   }
 }
