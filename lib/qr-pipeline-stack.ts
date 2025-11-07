@@ -1,10 +1,11 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { Environment } from "../environment";
-import { createBuckets, createTables } from "./constructs";
 import { createLambdas } from "./builders/lambdas";
 import { createApis } from "./builders/apis";
 import { createEndpoints } from "./builders/endpoints";
+import { createBuckets } from "./builders/buckets";
+import { createTables } from "./builders/tables";
 
 interface QrPipelineStackProps extends cdk.StackProps {
   environment: Environment;
