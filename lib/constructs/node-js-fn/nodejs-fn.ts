@@ -57,7 +57,7 @@ export const createNodejsFn = ({
           beforeBundling(inputDir: string, outputDir: string): string[] {
             return [
               // Install sharp with Linux platform binaries for Lambda
-              `cd ${inputDir} && npm install --platform=linux --arch=x64 --include=optional sharp`,
+              `cd ${inputDir} && npm install --platform=linux --arch=x64 --ignore-scripts=false --include=optional --no-save sharp`,
             ];
           },
           beforeInstall(): string[] {
@@ -67,8 +67,9 @@ export const createNodejsFn = ({
             return [];
           },
         },
-        // Exclude sharp from esbuild bundling - it will be included as external module
-        externalModules: ["sharp"],
+        // Explicitly include sharp from node_modules (don't bundle it, include as external)
+        // This tells the bundler to include sharp from node_modules with its native binaries
+        nodeModules: ["sharp"],
       }),
     },
   });
