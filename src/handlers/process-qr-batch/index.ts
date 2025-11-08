@@ -49,15 +49,43 @@ const processBatch = async (batchId: string): Promise<void> => {
 
   /**
    * CSV Inputs are in the format:
-   * referalCode
-   * email
-   * name
+   * Header: name,first_name,last_name,email,phone_number,coin_number,kickstarter_tag,kick_starter_url
+   * Data rows follow
    */
-  const csvInputLines = csvInputs.split("\n").filter((line) => line.trim());
+  // Normalize line endings and split
+  const normalizedCsv = csvInputs
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .trim();
+  const allLines = normalizedCsv.split("\n").filter((line) => line.trim());
+
   console.log("[ProcessQRBatch] Parsed CSV lines", {
     batchId,
-    totalLines: csvInputLines.length,
-    firstLine: csvInputLines[0]?.substring(0, 100),
+    totalLines: allLines.length,
+    firstLine: allLines[0]?.substring(0, 200),
+    firstLineIsHeader:
+      allLines[0]?.toLowerCase().includes("name") ||
+      allLines[0]?.toLowerCase().includes("first"),
+  });
+
+  // Skip the header row (first line)
+  if (allLines.length < 2) {
+    console.error(
+      "[ProcessQRBatch] CSV must contain at least header and one data row",
+      {
+        batchId,
+        lineCount: allLines.length,
+      }
+    );
+    throw new Error("CSV must contain at least a header and one data row");
+  }
+
+  const csvInputLines = allLines.slice(1); // Skip header
+  console.log("[ProcessQRBatch] Data lines after skipping header", {
+    batchId,
+    headerLine: allLines[0],
+    dataLineCount: csvInputLines.length,
+    firstDataLine: csvInputLines[0]?.substring(0, 200),
   });
 
   let processedCount = 0;
@@ -84,13 +112,38 @@ const processBatch = async (batchId: string): Promise<void> => {
         kick_starter_url,
       ] = csvInputLine.split(",");
 
+      // Validate required fields
+      if (!kick_starter_url || !kick_starter_url.includes("ref=")) {
+        throw new Error(
+          `Invalid kick_starter_url in line ${i + 1}: ${kick_starter_url}`
+        );
+      }
+
       const referalCode = kick_starter_url.split("ref=")[1];
+
+      if (!referalCode) {
+        throw new Error(
+          `Could not extract referalCode from URL: ${kick_starter_url}`
+        );
+      }
+
+      // Handle empty optional fields - provide empty string defaults
+      const firstName = (first_name || "").trim();
+      const lastName = (last_name || "").trim();
+      const phoneNumber = (phone_number || "").trim();
+
       console.log("[ProcessQRBatch] Extracted data from CSV line", {
         batchId,
         lineIndex: i + 1,
         referalCode,
-        email,
-        name,
+        email: email?.trim(),
+        name: name?.trim(),
+        firstName,
+        lastName,
+        phoneNumber,
+        hasFirstName: !!firstName,
+        hasLastName: !!lastName,
+        hasPhoneNumber: !!phoneNumber,
       });
 
       console.log("[ProcessQRBatch] Creating DynamoDB record", {
@@ -100,16 +153,16 @@ const processBatch = async (batchId: string): Promise<void> => {
       });
       await createQrCodeDynamo({
         referalCode,
-        referrerEmail: email,
-        referrerName: name,
+        referrerEmail: (email || "").trim(),
+        referrerName: (name || "").trim(),
         client: dynamoClient,
         tableName: process.env.REFERRER_STATS_TABLE_NAME!,
-        firstName: first_name,
-        lastName: last_name,
-        phoneNumber: phone_number,
-        referrerTag: kickstarter_tag,
-        coinNumber: coin_number,
-        kickstarterUrl: kick_starter_url,
+        firstName,
+        lastName,
+        phoneNumber,
+        referrerTag: (kickstarter_tag || "").trim(),
+        coinNumber: (coin_number || "").trim(),
+        kickstarterUrl: (kick_starter_url || "").trim(),
       });
       console.log("[ProcessQRBatch] DynamoDB record created", {
         batchId,
