@@ -178,6 +178,7 @@ const processBatch = async (batchId: string): Promise<void> => {
         referalCode,
         client: s3Client,
         bucketName: process.env.QR_BATCH_OUTPUT_BUCKET_NAME!,
+        batchId,
       });
       console.log("[ProcessQRBatch] QR code generated and uploaded", {
         batchId,

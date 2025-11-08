@@ -9,10 +9,12 @@ export const generateAndUploadQrCode = async ({
   referalCode,
   client,
   bucketName,
+  batchId,
 }: {
   referalCode: string;
   client: S3Client;
   bucketName: string;
+  batchId: string;
 }) => {
   // 1) Generate QR code PNG (high-res, good error correction)
   //    - PNG is the most common printer-friendly format
@@ -30,7 +32,7 @@ export const generateAndUploadQrCode = async ({
   await client.send(
     new PutObjectCommand({
       Bucket: bucketName,
-      Key: `qr-codes/${referalCode}.png`,
+      Key: `qr-codes/batch-${batchId}/${referalCode}.png`,
       Body: pngBuffer,
       ContentType: "image/png",
     })
