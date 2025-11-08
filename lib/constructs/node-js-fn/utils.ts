@@ -2,6 +2,7 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Queue } from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 const handleDynamoDBPermissions = ({
   fn,
@@ -100,6 +101,12 @@ export const handleSqsPermissions = ({
 }) => {
   if (permissions?.consume) {
     permissions.consume.grantConsumeMessages(fn);
+    fn.addEventSource(
+      new SqsEventSource(permissions.consume, {
+        batchSize: 1,
+        reportBatchItemFailures: true,
+      })
+    );
   }
   if (permissions?.send) {
     permissions.send.grantSendMessages(fn);
