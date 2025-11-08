@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import * as QRCode from "qrcode";
-import * as sharp from "sharp";
+import sharp from "sharp";
 
 /**
  * Generate a styled QR code PNG with white background, yellow circle, and black border
