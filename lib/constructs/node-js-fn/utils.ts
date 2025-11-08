@@ -93,15 +93,15 @@ export const handleSqsPermissions = ({
   permissions,
 }: {
   fn: NodejsFunction;
-  permissions: {
+  permissions?: {
     consume?: Queue;
     send?: Queue;
   };
 }) => {
-  if (permissions.consume) {
+  if (permissions?.consume) {
     permissions.consume.grantConsumeMessages(fn);
   }
-  if (permissions.send) {
+  if (permissions?.send) {
     permissions.send.grantSendMessages(fn);
   }
 };

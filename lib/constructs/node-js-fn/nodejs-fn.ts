@@ -4,7 +4,7 @@ import { Construct } from "constructs";
 import { Duration } from "aws-cdk-lib";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { handleStoragePermissions } from "./utils";
+import { handleSqsPermissions, handleStoragePermissions } from "./utils";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 
 export const createNodejsFn = ({
@@ -54,6 +54,7 @@ export const createNodejsFn = ({
   });
 
   handleStoragePermissions({ ...permissions, fn });
+  handleSqsPermissions({ fn, permissions: permissions.queues });
 
   return fn;
 };
