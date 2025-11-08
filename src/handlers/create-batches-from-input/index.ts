@@ -22,7 +22,9 @@ export const handler = async (event: any) => {
     bucketName,
   });
 
-  const { key } = JSON.parse(event.body || "{}");
+  const { key } =
+    typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+
   console.log("[CreateBatchesFromInput] Parsed request body", { key });
 
   if (!key) {
