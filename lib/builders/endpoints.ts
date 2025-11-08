@@ -7,6 +7,7 @@ export type QRPEndpoints = {
   Admin: {
     CreatePresignedCsvUploadUrlEndpoint: HttpRoute[];
     AddMetricsByQRCodeEndpoint: HttpRoute[];
+    CreateBatchesFromInputEndpoint: HttpRoute[];
   };
   PublicMetrics: {
     ListMetricsByQRCodeEndpoint: HttpRoute[];
@@ -37,6 +38,14 @@ export const createEndpoints = ({
           path: "/admin/add-metrics-by-qr-code",
           methods: [HttpMethod.POST],
           handler: lambdas.AddMetricsByQRBatchLambda,
+        },
+      }),
+      CreateBatchesFromInputEndpoint: createEndpoint({
+        api: apis.AdminApi,
+        props: {
+          path: "/admin/create-batches-from-input",
+          methods: [HttpMethod.POST],
+          handler: lambdas.CreateBatchesFromInputLambda,
         },
       }),
     },
