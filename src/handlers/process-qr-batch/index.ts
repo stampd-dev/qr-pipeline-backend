@@ -42,19 +42,20 @@ const processBatch = async (batchId: string): Promise<void> => {
 
   for (const csvInputLine of csvInputLines) {
     const [
-      referalCode,
-      email,
       name,
       first_name,
       last_name,
+      email,
       phone_number,
       coin_number,
       kickstarter_tag,
       kick_starter_url,
     ] = csvInputLine.split(",");
 
+    const referalCode = kick_starter_url.split("ref=")[1];
+
     await createQrCodeDynamo({
-      referalCode: kick_starter_url.split("ref=")[1],
+      referalCode,
       referrerEmail: email,
       referrerName: name,
       client: dynamoClient,
