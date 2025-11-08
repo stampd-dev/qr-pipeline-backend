@@ -163,14 +163,14 @@ export const handler = async (event: any) => {
       expectedRows: batch.length + 1, // +1 for header
     });
 
-    // await sendBatchToQueue({
-    //   batchId: newBatch.batchId,
-    //   queueUrl: processBatchQueueUrl,
-    // });
-    // console.log("[CreateBatchesFromInput] Sent batch to queue", {
-    //   batchId: newBatch.batchId,
-    //   queueUrl: processBatchQueueUrl,
-    // });
+    await sendBatchToQueue({
+      batchId: newBatch.batchId,
+      queueUrl: processBatchQueueUrl,
+    });
+    console.log("[CreateBatchesFromInput] Sent batch to queue", {
+      batchId: newBatch.batchId,
+      queueUrl: processBatchQueueUrl,
+    });
 
     createdBatchIds.push(newBatch.batchId);
   }
