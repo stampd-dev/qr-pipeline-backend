@@ -13,6 +13,7 @@ export const createNodejsFn = ({
   scope,
   environment,
   permissions,
+  needsSharp,
 }: {
   scope: Construct;
   id: string;
@@ -38,6 +39,7 @@ export const createNodejsFn = ({
       send?: Queue;
     };
   };
+  needsSharp?: boolean;
 }) => {
   const fn = new NodejsFunction(scope, id, {
     functionName: props.functionName,
@@ -50,6 +52,24 @@ export const createNodejsFn = ({
     bundling: {
       minify: true,
       target: "node18",
+      ...(needsSharp && {
+        commandHooks: {
+          beforeBundling(inputDir: string, outputDir: string): string[] {
+            return [
+              // Install sharp with Linux platform binaries for Lambda
+              `cd ${inputDir} && npm install --platform=linux --arch=x64 --include=optional sharp`,
+            ];
+          },
+          beforeInstall(): string[] {
+            return [];
+          },
+          afterBundling(): string[] {
+            return [];
+          },
+        },
+        // Exclude sharp from esbuild bundling - it will be included as external module
+        externalModules: ["sharp"],
+      }),
     },
   });
 

@@ -148,6 +148,7 @@ export const createLambdas = ({
           consume: queues.processBatchQueue,
         },
       },
+      needsSharp: true,
     }),
   };
 };
