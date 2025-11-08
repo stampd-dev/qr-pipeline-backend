@@ -56,13 +56,53 @@ export const handler = async (event: any) => {
   console.log("[CreateBatchesFromInput] CSV fetched successfully", {
     key,
     csvLength: csvInputs.length,
+    firstChars: csvInputs.substring(0, 200),
+    lastChars: csvInputs.substring(Math.max(0, csvInputs.length - 200)),
+    hasBOM: csvInputs.charCodeAt(0) === 0xfeff,
+  });
+
+  // Remove BOM if present (UTF-8 BOM is 0xFEFF)
+  let cleanedCsv = csvInputs;
+  if (cleanedCsv.charCodeAt(0) === 0xfeff) {
+    cleanedCsv = cleanedCsv.slice(1);
+    console.log("[CreateBatchesFromInput] Removed BOM from CSV");
+  }
+
+  // Trim leading/trailing whitespace
+  cleanedCsv = cleanedCsv.trim();
+
+  // Normalize line endings: handle both \r\n (Windows) and \n (Unix)
+  // Replace \r\n with \n, then replace any remaining \r with \n
+  const normalizedCsv = cleanedCsv.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  // Count raw newlines for diagnostics
+  const rawNewlineCount = (csvInputs.match(/\n/g) || []).length;
+  const rawCarriageReturnCount = (csvInputs.match(/\r/g) || []).length;
+
+  console.log("[CreateBatchesFromInput] Line ending analysis", {
+    rawNewlineCount,
+    rawCarriageReturnCount,
+    normalizedLength: normalizedCsv.length,
   });
 
   /** Split the csv into batches of 21 */
-  const allLines = csvInputs.split("\n").filter((line) => line.trim());
+  // Split on newlines and filter out empty lines
+  const allLines = normalizedCsv.split("\n").filter((line) => line.trim());
+
   console.log("[CreateBatchesFromInput] Parsed CSV lines", {
     totalLines: allLines.length,
-    firstLine: allLines[0]?.substring(0, 100),
+    firstLine: allLines[0]?.substring(0, 200),
+    firstLineLength: allLines[0]?.length,
+    secondLine: allLines[1]?.substring(0, 200),
+    secondLineLength: allLines[1]?.length,
+    lastLine: allLines[allLines.length - 1]?.substring(0, 200),
+    lastLineLength: allLines[allLines.length - 1]?.length,
+    sampleLines: allLines.slice(0, 5).map((line, idx) => ({
+      index: idx,
+      length: line.length,
+      preview: line.substring(0, 100),
+      hasCommas: (line.match(/,/g) || []).length,
+    })),
   });
 
   if (allLines.length < 2) {
@@ -95,27 +135,42 @@ export const handler = async (event: any) => {
       batchIndex: i + 1,
       batchId,
       batchSize: batch.length,
+      batchPreview: batch.slice(0, 2).map((line) => line.substring(0, 50)),
+    });
+
+    // Construct the batch CSV: header + data rows
+    const batchCsvContent = [resusableHeader, ...batch].join("\n");
+
+    console.log("[CreateBatchesFromInput] Batch CSV content details", {
+      batchId,
+      batchIndex: i + 1,
+      headerLength: resusableHeader.length,
+      batchRowCount: batch.length,
+      batchCsvLength: batchCsvContent.length,
+      batchCsvLineCount: (batchCsvContent.match(/\n/g) || []).length + 1,
+      firstLinePreview: batchCsvContent.substring(0, 150),
     });
 
     const newBatch = await createCsvBatch({
       batchId,
       client: s3Client,
       bucketName,
-      csvInputs: [resusableHeader, ...batch].join("\n"),
+      csvInputs: batchCsvContent,
     });
     console.log("[CreateBatchesFromInput] Created CSV batch file", {
       batchId: newBatch.batchId,
       s3Key: `csv-uploads/${newBatch.batchId}.csv`,
+      expectedRows: batch.length + 1, // +1 for header
     });
 
-    // await sendBatchToQueue({
-    //   batchId: newBatch.batchId,
-    //   queueUrl: processBatchQueueUrl,
-    // });
-    // console.log("[CreateBatchesFromInput] Sent batch to queue", {
-    //   batchId: newBatch.batchId,
-    //   queueUrl: processBatchQueueUrl,
-    // });
+    await sendBatchToQueue({
+      batchId: newBatch.batchId,
+      queueUrl: processBatchQueueUrl,
+    });
+    console.log("[CreateBatchesFromInput] Sent batch to queue", {
+      batchId: newBatch.batchId,
+      queueUrl: processBatchQueueUrl,
+    });
 
     createdBatchIds.push(newBatch.batchId);
   }
