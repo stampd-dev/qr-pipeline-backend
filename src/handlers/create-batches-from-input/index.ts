@@ -22,7 +22,9 @@ export const handler = async (event: any) => {
     bucketName,
   });
 
-  const { key } = JSON.parse(event.body || "{}");
+  const { key } =
+    typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+
   console.log("[CreateBatchesFromInput] Parsed request body", { key });
 
   if (!key) {
@@ -106,14 +108,14 @@ export const handler = async (event: any) => {
       s3Key: `csv-uploads/${newBatch.batchId}.csv`,
     });
 
-    await sendBatchToQueue({
-      batchId: newBatch.batchId,
-      queueUrl: processBatchQueueUrl,
-    });
-    console.log("[CreateBatchesFromInput] Sent batch to queue", {
-      batchId: newBatch.batchId,
-      queueUrl: processBatchQueueUrl,
-    });
+    // await sendBatchToQueue({
+    //   batchId: newBatch.batchId,
+    //   queueUrl: processBatchQueueUrl,
+    // });
+    // console.log("[CreateBatchesFromInput] Sent batch to queue", {
+    //   batchId: newBatch.batchId,
+    //   queueUrl: processBatchQueueUrl,
+    // });
 
     createdBatchIds.push(newBatch.batchId);
   }
