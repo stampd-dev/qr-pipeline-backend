@@ -31,13 +31,29 @@ export const handler = async (event: any) => {
    */
   const csvInputLines = csvInputs.split("\n");
   for (const csvInputLine of csvInputLines) {
-    const [referalCode, email, name] = csvInputLine.split(",");
-    await createQrCodeDynamo({
+    const [
       referalCode,
+      email,
+      name,
+      first_name,
+      last_name,
+      phone_number,
+      coin_number,
+      kickstarter_tag,
+      kick_starter_url,
+    ] = csvInputLine.split(",");
+    await createQrCodeDynamo({
+      referalCode: kick_starter_url.split("ref=")[1],
       referrerEmail: email,
       referrerName: name,
       client: dynamoClient,
       tableName: process.env.REFERRER_STATS_TABLE_NAME!,
+      firstName: first_name,
+      lastName: last_name,
+      phoneNumber: phone_number,
+      referrerTag: kickstarter_tag,
+      coinNumber: coin_number,
+      kickstarterUrl: kick_starter_url,
     });
     await generateAndUploadQrCode({
       referalCode,

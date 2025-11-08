@@ -6,6 +6,7 @@ import { createApis } from "./builders/apis";
 import { createEndpoints } from "./builders/endpoints";
 import { createBuckets } from "./builders/buckets";
 import { createTables } from "./builders/tables";
+import { createQueues } from "./builders/sqs";
 
 interface QrPipelineStackProps extends cdk.StackProps {
   environment: Environment;
@@ -17,7 +18,8 @@ export class QrPipelineStack extends cdk.Stack {
 
     const buckets = createBuckets(this);
     const tables = createTables(this);
-    const lambdas = createLambdas({ buckets, tables, scope: this });
+    const queues = createQueues(this);
+    const lambdas = createLambdas({ buckets, tables, scope: this, queues });
     const apis = createApis(this);
     createEndpoints({ lambdas, apis });
   }

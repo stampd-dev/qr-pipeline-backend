@@ -10,6 +10,7 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ENV_NAME: ${{ secrets.ENV_NAME }}
   STACK_NAME: ${{ secrets.STACK_NAME }}
+  IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
 
 permissions:
   contents: write # <-- required for repository_dispatch

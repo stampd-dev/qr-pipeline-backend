@@ -3,10 +3,13 @@ import { createNodejsFn } from "../constructs/node-js-fn/nodejs-fn";
 import { QRPBuckets } from "./buckets";
 import { QRPTables } from "./tables";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { QRPQueues } from "./sqs";
+import { environment } from "../../environment";
 
 export type QRPLambdas = {
   /** Ingestion Lambdas */
   CreatePresignedCsvUploadUrlLambda: NodejsFunction;
+  CreateBatchesFromInputLambda: NodejsFunction;
 
   /** Digestion Lambdas */
   ProcessQRBatchLambda: NodejsFunction;
@@ -21,10 +24,12 @@ export const createLambdas = ({
   buckets,
   tables,
   scope,
+  queues,
 }: {
   buckets: QRPBuckets;
   tables: QRPTables;
   scope: Construct;
+  queues: QRPQueues;
 }): QRPLambdas => {
   return {
     AddMetricsByQRBatchLambda: createNodejsFn({
@@ -37,6 +42,7 @@ export const createLambdas = ({
       scope,
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+        IPINFO_TOKEN: environment.ipinfoToken,
       },
       permissions: {
         tables: {
@@ -95,11 +101,33 @@ export const createLambdas = ({
         },
       },
     }),
+    CreateBatchesFromInputLambda: createNodejsFn({
+      environment: {
+        CSV_INPUT_BUCKET_NAME: buckets.CsvInput.bucketName,
+        PROCESS_BATCH_QUEUE_URL: queues.processBatchQueue.queueUrl,
+      },
+      scope,
+      id: "QRP-CreateBatchesFromInputLambda",
+      props: {
+        functionName: "QRP-CreateBatchesFromInputLambda",
+        handler: "index.handler",
+        entry: "src/handlers/create-batches-from-input/index.ts",
+      },
+      permissions: {
+        buckets: {
+          full: [buckets.CsvInput],
+        },
+        queues: {
+          send: queues.processBatchQueue,
+        },
+      },
+    }),
     ProcessQRBatchLambda: createNodejsFn({
       environment: {
         QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         CSV_INPUT_BUCKET_NAME: buckets.CsvInput.bucketName,
+        PROCESS_BATCH_QUEUE_URL: queues.processBatchQueue.queueUrl,
       },
       scope,
       id: "QRP-ProcessQRBatchLambda",
@@ -115,6 +143,9 @@ export const createLambdas = ({
         },
         tables: {
           write: [tables.RefererStats],
+        },
+        queues: {
+          consume: queues.processBatchQueue,
         },
       },
     }),

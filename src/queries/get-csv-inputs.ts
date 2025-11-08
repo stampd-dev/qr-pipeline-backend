@@ -16,3 +16,20 @@ export const getCsvInputs = async ({
   const response = await client.send(command);
   return response.Body?.transformToString("utf-8");
 };
+
+export const getRawCsvInputs = async ({
+  key,
+  client,
+  bucketName,
+}: {
+  key: string;
+  client: S3Client;
+  bucketName: string;
+}) => {
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  });
+  const response = await client.send(command);
+  return response.Body?.transformToString("utf-8");
+};

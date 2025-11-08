@@ -5,6 +5,7 @@ import { Duration } from "aws-cdk-lib";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { handleStoragePermissions } from "./utils";
+import { Queue } from "aws-cdk-lib/aws-sqs";
 
 export const createNodejsFn = ({
   id,
@@ -31,6 +32,10 @@ export const createNodejsFn = ({
       read?: Bucket[];
       write?: Bucket[];
       full?: Bucket[];
+    };
+    queues?: {
+      consume?: Queue;
+      send?: Queue;
     };
   };
 }) => {

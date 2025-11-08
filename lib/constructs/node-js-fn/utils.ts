@@ -1,6 +1,7 @@
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
+import { Queue } from "aws-cdk-lib/aws-sqs";
 
 const handleDynamoDBPermissions = ({
   fn,
@@ -84,5 +85,23 @@ export const handleStoragePermissions = ({
   }
   if (buckets) {
     handleS3Permissions({ fn, permissions: buckets });
+  }
+};
+
+export const handleSqsPermissions = ({
+  fn,
+  permissions,
+}: {
+  fn: NodejsFunction;
+  permissions: {
+    consume?: Queue;
+    send?: Queue;
+  };
+}) => {
+  if (permissions.consume) {
+    permissions.consume.grantConsumeMessages(fn);
+  }
+  if (permissions.send) {
+    permissions.send.grantSendMessages(fn);
   }
 };
