@@ -206,7 +206,9 @@ const processBatch = async (batchId: string): Promise<void> => {
   });
 };
 
-export const handler = async (event: SQSEvent): Promise<void> => {
+export const handler = async (
+  event: SQSEvent
+): Promise<{ batchItemFailures: Array<{ itemIdentifier: string }> }> => {
   console.log("[ProcessQRBatch] Handler invoked", {
     recordCount: event.Records?.length || 0,
     event: JSON.stringify(event, null, 2),
@@ -214,7 +216,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
   if (!event.Records || event.Records.length === 0) {
     console.warn("[ProcessQRBatch] No records found in SQS event");
-    return;
+    return { batchItemFailures: [] };
   }
 
   console.log("[ProcessQRBatch] Processing SQS records", {
@@ -222,6 +224,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
     messageIds: event.Records.map((r) => r.messageId),
   });
 
+  const batchItemFailures: Array<{ itemIdentifier: string }> = [];
   let successCount = 0;
   let failureCount = 0;
 
@@ -247,7 +250,10 @@ export const handler = async (event: SQSEvent): Promise<void> => {
           messageId: record.messageId,
           message,
         });
-        throw new Error(`Missing batchId in message: ${record.messageId}`);
+        // Mark as failed for DLQ processing
+        batchItemFailures.push({ itemIdentifier: record.messageId });
+        failureCount++;
+        continue;
       }
 
       console.log("[ProcessQRBatch] Starting batch processing", {
@@ -268,7 +274,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
-      throw error;
+      // Mark this specific record as failed for partial batch failure reporting
+      batchItemFailures.push({ itemIdentifier: record.messageId });
     }
   }
 
@@ -276,5 +283,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
     totalRecords: event.Records.length,
     successCount,
     failureCount,
+    batchItemFailures: batchItemFailures.length,
   });
+
+  // Return batch item failures so SQS knows which messages to retry/send to DLQ
+  return { batchItemFailures };
 };
