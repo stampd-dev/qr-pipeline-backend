@@ -68,9 +68,9 @@ export const createLambdas = ({
       },
     }),
     UpdateCodeMetricsFn: createNodejsFn({
-      id: "QRP-AddMetricsByQRBatchLambda",
+      id: "QRP-UpdateCode",
       props: {
-        functionName: "QRP-AddMetricsByQRBatchLambda",
+        functionName: "QRP-UpdateCodeMetrics",
         handler: "index.handler",
         entry: "src/handlers/update-code-metrics/index.ts",
       },
@@ -90,9 +90,9 @@ export const createLambdas = ({
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
       },
       scope,
-      id: "QRP-ListMetricsByQRCodeLambda",
+      id: "QRP-GetMetricsByCode",
       props: {
-        functionName: "QRP-ListMetricsByQRCodeLambda",
+        functionName: "QRP-GetMetricsByCode",
         handler: "index.handler",
         entry: "src/handlers/get-metrics-by-code/index.ts",
       },
@@ -107,9 +107,9 @@ export const createLambdas = ({
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
       },
       scope,
-      id: "QRP-ListQRMetrics",
+      id: "QRP-GetTopCodes",
       props: {
-        functionName: "QRP-ListQRMetrics",
+        functionName: "QRP-GetTopCodes",
         handler: "index.handler",
         entry: "src/handlers/get-top-codes/index.ts",
       },
