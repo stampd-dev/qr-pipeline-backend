@@ -209,83 +209,101 @@ const processBatch = async (batchId: string): Promise<void> => {
 export const handler = async (
   event: SQSEvent
 ): Promise<{ batchItemFailures: Array<{ itemIdentifier: string }> }> => {
-  console.log("[ProcessQRBatch] Handler invoked", {
-    recordCount: event.Records?.length || 0,
-    event: JSON.stringify(event, null, 2),
-  });
-
-  if (!event.Records || event.Records.length === 0) {
-    console.warn("[ProcessQRBatch] No records found in SQS event");
-    return { batchItemFailures: [] };
-  }
-
-  console.log("[ProcessQRBatch] Processing SQS records", {
-    recordCount: event.Records.length,
-    messageIds: event.Records.map((r) => r.messageId),
-  });
-
-  const batchItemFailures: Array<{ itemIdentifier: string }> = [];
-  let successCount = 0;
-  let failureCount = 0;
-
-  for (let i = 0; i < event.Records.length; i++) {
-    const record = event.Records[i];
-    console.log("[ProcessQRBatch] Processing record", {
-      recordIndex: i + 1,
-      totalRecords: event.Records.length,
-      messageId: record.messageId,
+  // Wrap entire handler in try-catch to ensure we always return batchItemFailures
+  // This prevents infinite retries if there's an unexpected error
+  try {
+    console.log("[ProcessQRBatch] Handler invoked", {
+      recordCount: event.Records?.length || 0,
+      event: JSON.stringify(event, null, 2),
     });
 
-    try {
-      const message: QueueMessage = JSON.parse(record.body);
-      console.log("[ProcessQRBatch] Parsed queue message", {
+    if (!event.Records || event.Records.length === 0) {
+      console.warn("[ProcessQRBatch] No records found in SQS event");
+      return { batchItemFailures: [] };
+    }
+
+    console.log("[ProcessQRBatch] Processing SQS records", {
+      recordCount: event.Records.length,
+      messageIds: event.Records.map((r) => r.messageId),
+    });
+
+    const batchItemFailures: Array<{ itemIdentifier: string }> = [];
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (let i = 0; i < event.Records.length; i++) {
+      const record = event.Records[i];
+      console.log("[ProcessQRBatch] Processing record", {
+        recordIndex: i + 1,
+        totalRecords: event.Records.length,
         messageId: record.messageId,
-        message,
       });
 
-      const { batchId } = message;
-
-      if (!batchId) {
-        console.error("[ProcessQRBatch] Missing batchId in message", {
+      try {
+        const message: QueueMessage = JSON.parse(record.body);
+        console.log("[ProcessQRBatch] Parsed queue message", {
           messageId: record.messageId,
           message,
         });
-        // Mark as failed for DLQ processing
-        batchItemFailures.push({ itemIdentifier: record.messageId });
+
+        const { batchId } = message;
+
+        if (!batchId) {
+          console.error("[ProcessQRBatch] Missing batchId in message", {
+            messageId: record.messageId,
+            message,
+          });
+          // Mark as failed for DLQ processing
+          batchItemFailures.push({ itemIdentifier: record.messageId });
+          failureCount++;
+          continue;
+        }
+
+        console.log("[ProcessQRBatch] Starting batch processing", {
+          messageId: record.messageId,
+          batchId,
+        });
+        await processBatch(batchId);
+        console.log("[ProcessQRBatch] Successfully processed batch", {
+          messageId: record.messageId,
+          batchId,
+        });
+        successCount++;
+      } catch (error) {
         failureCount++;
-        continue;
+        console.error("[ProcessQRBatch] Error processing record", {
+          messageId: record.messageId,
+          recordIndex: i + 1,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+        // Mark this specific record as failed for partial batch failure reporting
+        batchItemFailures.push({ itemIdentifier: record.messageId });
       }
-
-      console.log("[ProcessQRBatch] Starting batch processing", {
-        messageId: record.messageId,
-        batchId,
-      });
-      await processBatch(batchId);
-      console.log("[ProcessQRBatch] Successfully processed batch", {
-        messageId: record.messageId,
-        batchId,
-      });
-      successCount++;
-    } catch (error) {
-      failureCount++;
-      console.error("[ProcessQRBatch] Error processing record", {
-        messageId: record.messageId,
-        recordIndex: i + 1,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      // Mark this specific record as failed for partial batch failure reporting
-      batchItemFailures.push({ itemIdentifier: record.messageId });
     }
+
+    console.log("[ProcessQRBatch] Handler completed", {
+      totalRecords: event.Records.length,
+      successCount,
+      failureCount,
+      batchItemFailures: batchItemFailures.length,
+    });
+
+    // Return batch item failures so SQS knows which messages to retry/send to DLQ
+    return { batchItemFailures };
+  } catch (error) {
+    // Catch any unexpected errors (like module loading errors) and mark all records as failed
+    console.error("[ProcessQRBatch] Fatal error in handler", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      recordCount: event.Records?.length || 0,
+    });
+
+    // Mark all records as failed so they go to DLQ after maxReceiveCount
+    const batchItemFailures: Array<{ itemIdentifier: string }> = (
+      event.Records || []
+    ).map((record) => ({ itemIdentifier: record.messageId }));
+
+    return { batchItemFailures };
   }
-
-  console.log("[ProcessQRBatch] Handler completed", {
-    totalRecords: event.Records.length,
-    successCount,
-    failureCount,
-    batchItemFailures: batchItemFailures.length,
-  });
-
-  // Return batch item failures so SQS knows which messages to retry/send to DLQ
-  return { batchItemFailures };
 };
