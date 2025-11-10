@@ -8,16 +8,17 @@ import { environment } from "../../environment";
 
 export type QRPLambdas = {
   /** Ingestion Lambdas */
-  CreatePresignedCsvUploadUrlLambda: NodejsFunction;
-  CreateBatchesFromInputLambda: NodejsFunction;
+  CreateBatchesFromInputFn: NodejsFunction;
 
-  /** Digestion Lambdas */
-  ProcessQRBatchLambda: NodejsFunction;
+  /** Digestion Fns */
+  ProcessQRBatchFn: NodejsFunction;
 
-  /** Metrics Lambdas */
-  AddMetricsByQRBatchLambda: NodejsFunction;
-  ListQRMetrics: NodejsFunction;
-  ListMetricsByQRCodeLambda: NodejsFunction;
+  /** Metrics Fns */
+  AddNewReferrerFn: NodejsFunction;
+  GetMetricsByCodeFn: NodejsFunction;
+  GetTopCodesFn: NodejsFunction;
+  RegisterCodeFn: NodejsFunction;
+  UpdateCodeMetricsFn: NodejsFunction;
 };
 
 export const createLambdas = ({
@@ -32,12 +33,46 @@ export const createLambdas = ({
   queues: QRPQueues;
 }): QRPLambdas => {
   return {
-    AddMetricsByQRBatchLambda: createNodejsFn({
+    RegisterCodeFn: createNodejsFn({
+      id: "QRP-RegisterCode",
+      props: {
+        functionName: "QRP-RegisterCode",
+        handler: "index.handler",
+        entry: "src/handlers/register-code/index.ts",
+      },
+      scope,
+      environment: {
+        REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+      },
+      permissions: {
+        tables: {
+          full: [tables.RefererStats],
+        },
+      },
+    }),
+    AddNewReferrerFn: createNodejsFn({
+      id: "QRP-AddNewReferrer",
+      props: {
+        functionName: "QRP-AddNewReferrer",
+        handler: "index.handler",
+        entry: "src/handlers/add-new-referrer/index.ts",
+      },
+      scope,
+      environment: {
+        REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+      },
+      permissions: {
+        tables: {
+          full: [tables.RefererStats],
+        },
+      },
+    }),
+    UpdateCodeMetricsFn: createNodejsFn({
       id: "QRP-AddMetricsByQRBatchLambda",
       props: {
         functionName: "QRP-AddMetricsByQRBatchLambda",
         handler: "index.handler",
-        entry: "src/handlers/add-metrics-to-code/index.ts",
+        entry: "src/handlers/update-code-metrics/index.ts",
       },
       scope,
       environment: {
@@ -50,24 +85,7 @@ export const createLambdas = ({
         },
       },
     }),
-    CreatePresignedCsvUploadUrlLambda: createNodejsFn({
-      environment: {
-        CSV_INPUT_BUCKET_NAME: buckets.CsvInput.bucketName,
-      },
-      scope,
-      id: "QRP-CreatePresignedCsvUploadUrlLambda",
-      props: {
-        functionName: "QRP-CreatePresignedCsvUploadUrlLambda",
-        handler: "index.handler",
-        entry: "src/handlers/create-csv-upload-link/index.ts",
-      },
-      permissions: {
-        buckets: {
-          full: [buckets.CsvInput],
-        },
-      },
-    }),
-    ListMetricsByQRCodeLambda: createNodejsFn({
+    GetMetricsByCodeFn: createNodejsFn({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
       },
@@ -76,7 +94,7 @@ export const createLambdas = ({
       props: {
         functionName: "QRP-ListMetricsByQRCodeLambda",
         handler: "index.handler",
-        entry: "src/handlers/list-metrics-by-code/index.ts",
+        entry: "src/handlers/get-metrics-by-code/index.ts",
       },
       permissions: {
         tables: {
@@ -84,7 +102,7 @@ export const createLambdas = ({
         },
       },
     }),
-    ListQRMetrics: createNodejsFn({
+    GetTopCodesFn: createNodejsFn({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
       },
@@ -93,7 +111,7 @@ export const createLambdas = ({
       props: {
         functionName: "QRP-ListQRMetrics",
         handler: "index.handler",
-        entry: "src/handlers/list-all-metrics/index.ts",
+        entry: "src/handlers/get-top-codes/index.ts",
       },
       permissions: {
         tables: {
@@ -101,15 +119,15 @@ export const createLambdas = ({
         },
       },
     }),
-    CreateBatchesFromInputLambda: createNodejsFn({
+    CreateBatchesFromInputFn: createNodejsFn({
       environment: {
         CSV_INPUT_BUCKET_NAME: buckets.CsvInput.bucketName,
         PROCESS_BATCH_QUEUE_URL: queues.processBatchQueue.queueUrl,
       },
       scope,
-      id: "QRP-CreateBatchesFromInputLambda",
+      id: "QRP-CreateBatchesFromInput",
       props: {
-        functionName: "QRP-CreateBatchesFromInputLambda",
+        functionName: "QRP-CreateBatchesFromInput",
         handler: "index.handler",
         entry: "src/handlers/create-batches-from-input/index.ts",
       },
@@ -122,7 +140,7 @@ export const createLambdas = ({
         },
       },
     }),
-    ProcessQRBatchLambda: createNodejsFn({
+    ProcessQRBatchFn: createNodejsFn({
       environment: {
         QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
@@ -130,9 +148,9 @@ export const createLambdas = ({
         PROCESS_BATCH_QUEUE_URL: queues.processBatchQueue.queueUrl,
       },
       scope,
-      id: "QRP-ProcessQRBatchLambda",
+      id: "QRP-ProcessQRBatch",
       props: {
-        functionName: "QRP-ProcessQRBatchLambda",
+        functionName: "QRP-ProcessQRBatch",
         handler: "index.handler",
         entry: "src/handlers/process-qr-batch/index.ts",
       },

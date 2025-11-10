@@ -5,13 +5,14 @@ import { HttpMethod, HttpRoute } from "aws-cdk-lib/aws-apigatewayv2";
 
 export type QRPEndpoints = {
   Admin: {
-    CreatePresignedCsvUploadUrlEndpoint: HttpRoute[];
-    AddMetricsByQRCodeEndpoint: HttpRoute[];
+    RegisterCodeEndpoint: HttpRoute[];
+    AddNewReferrerEndpoint: HttpRoute[];
+    UpdateCodeMetricsEndpoint: HttpRoute[];
     CreateBatchesFromInputEndpoint: HttpRoute[];
   };
   PublicMetrics: {
-    ListMetricsByQRCodeEndpoint: HttpRoute[];
-    ListQRMetricsEndpoint: HttpRoute[];
+    GetTopCodesEndpoint: HttpRoute[];
+    GetMetricsByCodeEndpoint: HttpRoute[];
   };
 };
 
@@ -24,20 +25,12 @@ export const createEndpoints = ({
 }): QRPEndpoints => {
   return {
     Admin: {
-      CreatePresignedCsvUploadUrlEndpoint: createEndpoint({
+      UpdateCodeMetricsEndpoint: createEndpoint({
         api: apis.AdminApi,
         props: {
-          path: "/admin/create-presigned-csv-upload-url",
+          path: "/admin/update-code-metrics",
           methods: [HttpMethod.POST],
-          handler: lambdas.CreatePresignedCsvUploadUrlLambda,
-        },
-      }),
-      AddMetricsByQRCodeEndpoint: createEndpoint({
-        api: apis.AdminApi,
-        props: {
-          path: "/admin/add-metrics-by-qr-code",
-          methods: [HttpMethod.POST],
-          handler: lambdas.AddMetricsByQRBatchLambda,
+          handler: lambdas.UpdateCodeMetricsFn,
         },
       }),
       CreateBatchesFromInputEndpoint: createEndpoint({
@@ -45,25 +38,41 @@ export const createEndpoints = ({
         props: {
           path: "/admin/create-batches-from-input",
           methods: [HttpMethod.POST],
-          handler: lambdas.CreateBatchesFromInputLambda,
+          handler: lambdas.CreateBatchesFromInputFn,
+        },
+      }),
+      RegisterCodeEndpoint: createEndpoint({
+        api: apis.AdminApi,
+        props: {
+          path: "/admin/register-code",
+          methods: [HttpMethod.POST],
+          handler: lambdas.RegisterCodeFn,
+        },
+      }),
+      AddNewReferrerEndpoint: createEndpoint({
+        api: apis.AdminApi,
+        props: {
+          path: "/admin/add-new-referrer",
+          methods: [HttpMethod.POST],
+          handler: lambdas.AddNewReferrerFn,
         },
       }),
     },
     PublicMetrics: {
-      ListMetricsByQRCodeEndpoint: createEndpoint({
+      GetMetricsByCodeEndpoint: createEndpoint({
         api: apis.PublicMetricsApi,
         props: {
-          path: "/public-metrics/list-metrics-by-qr-code",
+          path: "/public-metrics/get-metrics-by-code",
           methods: [HttpMethod.GET],
-          handler: lambdas.ListMetricsByQRCodeLambda,
+          handler: lambdas.GetMetricsByCodeFn,
         },
       }),
-      ListQRMetricsEndpoint: createEndpoint({
+      GetTopCodesEndpoint: createEndpoint({
         api: apis.PublicMetricsApi,
         props: {
-          path: "/public-metrics/list-qr-metrics",
+          path: "/public-metrics/get-top-codes",
           methods: [HttpMethod.GET],
-          handler: lambdas.ListQRMetrics,
+          handler: lambdas.GetTopCodesFn,
         },
       }),
     },
