@@ -63,7 +63,7 @@ export const createEndpoints = ({
         api: apis.PublicMetricsApi,
         props: {
           path: "/public-metrics/get-metrics-by-code",
-          methods: [HttpMethod.GET],
+          methods: [HttpMethod.POST],
           handler: lambdas.GetMetricsByCodeFn,
         },
       }),
