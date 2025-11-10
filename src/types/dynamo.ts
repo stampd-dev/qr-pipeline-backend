@@ -32,4 +32,5 @@ export type RefererStats = {
   referrerTag: string;
   coinNumber: string;
   kickstarterUrl: string;
+  registered?: boolean;
 };
