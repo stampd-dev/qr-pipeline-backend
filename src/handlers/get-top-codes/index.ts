@@ -34,11 +34,11 @@ const mockTopCodes: GetTopCodesResponse = {
       name: "Code 1",
       locations: [
         {
-          city: "New York",
-          region: "New York",
+          city: "Austin",
+          region: "Texas",
           country: "US",
-          lat: 40.7128,
-          lon: -74.006,
+          lat: 30.2672,
+          lon: -97.7431,
           totalScans: 100,
           uniqueIps: 100,
           firstSeenAt: "2025-01-01T00:00:00.000Z",
@@ -81,7 +81,7 @@ const mockTopCodes: GetTopCodesResponse = {
     },
     second: {
       name: "Code 2",
-      totalUniqueScans: 100,
+      totalUniqueScans: 50,
     },
   },
 };
