@@ -2,6 +2,11 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { RefererStats } from "../../types/dynamo";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getQrCodeDynamo } from "../../queries/get-qr-code-dynamo";
+import {
+  getSuccessResponse,
+  getErrorResponse,
+} from "../../utils/handler-response";
+import type { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
@@ -18,10 +23,7 @@ export type GetMetricsByCodeResponse = {
 };
 export const handler = async (
   event: any
-): Promise<{
-  statusCode: number;
-  body: GetMetricsByCodeResponse;
-}> => {
+): Promise<APIGatewayProxyStructuredResultV2> => {
   console.log("[ListMetricsByCode] Handler invoked", {
     event: JSON.stringify(event, null, 2),
   });
@@ -36,37 +38,37 @@ export const handler = async (
   });
 
   if (!currentRecord) {
-    return {
+    console.error("[ListMetricsByCode] Code not found", {
+      code: body.code,
+    });
+    return getErrorResponse({
       statusCode: 404,
-      body: {
-        success: false,
-        message: "Code not found",
-        registered: false,
-        record: {} as RefererStats,
-      },
-    };
+      body: { error: "Code not found" },
+    });
   }
 
-  if (currentRecord.referrerEmail) {
-    return {
-      statusCode: 200,
-      body: {
-        success: true,
-        message: "Code found",
-        registered: true,
-        record: currentRecord,
-      },
-    };
-  }
-
-  console.log("[ListMetricsByCode] Handler completed (not yet implemented)");
-  return {
-    statusCode: 200,
-    body: {
+  if (currentRecord.registered) {
+    console.log("[ListMetricsByCode] Code is registered", {
+      code: body.code,
+      currentRecord,
+    });
+    return getSuccessResponse({
       success: true,
       message: "Code found",
-      registered: false,
+      registered: true,
       record: currentRecord,
-    },
-  };
+    });
+  }
+
+  console.log("[ListMetricsByCode] Code is not registered", {
+    code: body.code,
+    currentRecord,
+  });
+
+  return getSuccessResponse({
+    success: true,
+    message: "Code found",
+    registered: false,
+    record: currentRecord,
+  });
 };
