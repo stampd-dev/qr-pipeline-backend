@@ -45,6 +45,7 @@ export const createLambdas = ({
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         RIPPLES_TABLE_NAME: tables.Ripples.tableName,
         QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
+        IPINFO_TOKEN: environment.ipinfoToken,
       },
       permissions: {
         tables: {
@@ -68,6 +69,7 @@ export const createLambdas = ({
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
         RIPPLES_TABLE_NAME: tables.Ripples.tableName,
+        IPINFO_TOKEN: environment.ipinfoToken,
       },
       permissions: {
         tables: {
