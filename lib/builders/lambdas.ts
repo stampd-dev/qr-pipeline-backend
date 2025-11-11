@@ -115,7 +115,7 @@ export const createLambdas = ({
       },
       permissions: {
         tables: {
-          read: [tables.RefererStats],
+          full: [tables.RefererStats],
           write: [tables.Ripples],
         },
         buckets: {
