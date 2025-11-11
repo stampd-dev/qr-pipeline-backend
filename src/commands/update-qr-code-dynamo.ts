@@ -67,6 +67,11 @@ export const updateQrCodeDynamo = async ({
     : isUniqueIp;
 
   if (shouldUpdateSplashLocation) {
+    console.log("[UpdateQrCodeDynamo] Updating splash location", {
+      fingerprint,
+      ip,
+      existingItem,
+    });
     const resolved = await resolveIpLocation(ip);
     splashLocations = upsertSplashLocation({
       existing: splashLocations,
@@ -74,6 +79,15 @@ export const updateQrCodeDynamo = async ({
       isUniqueIp: isUniqueScan,
       nowIso,
     });
+  } else {
+    console.log(
+      "[UpdateQrCodeDynamo] Skipping splash location update for existing fingerprint",
+      {
+        fingerprint,
+        existingItem,
+      }
+    );
+    splashLocations = existingItem.splashLocations ?? [];
   }
 
   const updatedItem: RefererStats = {
