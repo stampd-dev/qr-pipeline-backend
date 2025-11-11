@@ -11,8 +11,12 @@ export const handler = async (event: any) => {
     tableName,
   });
 
-  const { referalCode, ip } = JSON.parse(event.body || "{}");
-  console.log("[AddMetricsToCode] Parsed request body", { referalCode, ip });
+  const { referalCode, ip, fingerprint } = JSON.parse(event.body || "{}");
+  console.log("[AddMetricsToCode] Parsed request body", {
+    referalCode,
+    ip,
+    fingerprint,
+  });
 
   if (!referalCode) {
     console.error("[AddMetricsToCode] Missing referalCode in request body");
@@ -33,11 +37,13 @@ export const handler = async (event: any) => {
   console.log("[AddMetricsToCode] Updating QR code metrics", {
     referalCode,
     ip,
+    fingerprint,
     tableName,
   });
   const updatedItem = await updateQrCodeDynamo({
     referalCode,
     ip,
+    fingerprint,
     client: dynamoClient,
     tableName,
   });
