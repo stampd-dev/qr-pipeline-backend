@@ -103,11 +103,19 @@ export const handler = async (
       client: dynamoClient,
     });
 
+    const qrCodeDownloadUrl = await createQrCodePresignedUrl({
+      referalCode: body.code,
+      client: s3Client,
+      bucketName: bucketName,
+    });
+
     return getSuccessResponse({
       success: true,
       message: "Code found",
       registered: true,
       record: updatedItem,
+      qr_code_download_url: qrCodeDownloadUrl,
+      referral_link: `https://main.d19hohaefmsqg9.amplifyapp.com/?ref=${body.code}`,
     });
   }
 
