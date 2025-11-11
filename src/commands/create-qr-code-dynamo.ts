@@ -50,6 +50,7 @@ export const createQrCodeDynamo = async ({
     totalScans: 0,
     uniqueScans: 0,
     ipUsage: {},
+    fingerprintUsage: {},
     referrerEmail,
     referrerName,
     firstName,

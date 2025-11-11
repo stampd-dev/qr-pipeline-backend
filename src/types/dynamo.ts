@@ -23,6 +23,7 @@ export type RefererStats = {
   totalScans: number;
   uniqueScans: number;
   ipUsage: { [ip: string]: number };
+  fingerprintUsage: { [fingerprint: string]: number };
   splashLocations: SplashLocation[];
   referrerEmail: string;
   referrerName: string;

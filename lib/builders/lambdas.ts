@@ -103,6 +103,8 @@ export const createLambdas = ({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
+        IPINFO_TOKEN: environment.ipinfoToken,
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
       },
       scope,
       id: "QRP-GetMetricsByCode",
@@ -114,6 +116,7 @@ export const createLambdas = ({
       permissions: {
         tables: {
           read: [tables.RefererStats],
+          write: [tables.Ripples],
         },
         buckets: {
           full: [buckets.QRBatchOutput],

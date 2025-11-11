@@ -22,6 +22,7 @@ interface RegisterCodeBody {
   phone: string;
   nickname: string; //calc as first name + last name from form
   ip: string;
+  fingerprint?: string;
 }
 
 export const handler = async (event: any) => {
@@ -70,6 +71,7 @@ export const handler = async (event: any) => {
     referalCode: body.code,
     tableName,
     ip: body.ip,
+    fingerprint: body.fingerprint,
     registered: true,
     firstName: body.firstName,
     lastName: body.lastName,

@@ -11,6 +11,7 @@ type UpdateQrCodeDynamoArgs = {
   client: DynamoDBDocumentClient;
   tableName: string;
   ip: string;
+  fingerprint?: string;
   /** Optional: injectable clock for tests */
   now?: Date;
   registered?: boolean;
@@ -26,6 +27,7 @@ export const updateQrCodeDynamo = async ({
   client,
   tableName,
   ip,
+  fingerprint,
   now = new Date(),
   registered = false,
   firstName = "",
@@ -47,17 +49,29 @@ export const updateQrCodeDynamo = async ({
   const nowIso = now.toISOString();
 
   const ipUsage = existingItem.ipUsage ?? {};
+  const fingerprintUsage = existingItem.fingerprintUsage ?? {};
   const isUniqueIp = !ipUsage[ip];
+  const isUniqueFingerprint = fingerprint
+    ? !fingerprintUsage[fingerprint]
+    : false;
+
+  // If fingerprint is provided, use it as primary check for uniqueness
+  // Otherwise fall back to IP-based check
+  const isUniqueScan = fingerprint ? isUniqueFingerprint : isUniqueIp;
 
   let splashLocations = existingItem.splashLocations ?? [];
 
-  // Only resolve location + touch splashLocations for NEW IPs
-  if (isUniqueIp) {
+  // Only resolve location + touch splashLocations for NEW fingerprints (or new IPs if no fingerprint)
+  const shouldUpdateSplashLocation = fingerprint
+    ? isUniqueFingerprint
+    : isUniqueIp;
+
+  if (shouldUpdateSplashLocation) {
     const resolved = await resolveIpLocation(ip);
     splashLocations = upsertSplashLocation({
       existing: splashLocations,
       resolved,
-      isUniqueIp,
+      isUniqueIp: isUniqueScan,
       nowIso,
     });
   }
@@ -66,11 +80,17 @@ export const updateQrCodeDynamo = async ({
     ...existingItem,
     updatedAt: nowIso,
     totalScans: (existingItem.totalScans ?? 0) + 1,
-    uniqueScans: (existingItem.uniqueScans ?? 0) + (isUniqueIp ? 1 : 0),
+    uniqueScans: (existingItem.uniqueScans ?? 0) + (isUniqueScan ? 1 : 0),
     ipUsage: {
       ...ipUsage,
       [ip]: (ipUsage[ip] || 0) + 1,
     },
+    fingerprintUsage: fingerprint
+      ? {
+          ...fingerprintUsage,
+          [fingerprint]: (fingerprintUsage[fingerprint] || 0) + 1,
+        }
+      : fingerprintUsage,
     splashLocations,
     ...(registered ? { registered: true } : {}),
     ...(firstName ? { firstName } : {}),

@@ -9,13 +9,18 @@ import {
 import type { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { S3Client } from "@aws-sdk/client-s3";
 import { createQrCodePresignedUrl } from "../../commands/create-qr-code-presigned-url";
+import { addRippleEvent } from "../../commands/add-ripple-event";
+import { updateQrCodeDynamo } from "../../commands/update-qr-code-dynamo";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
 const s3Client = new S3Client();
 const bucketName = process.env.QR_BATCH_OUTPUT_BUCKET_NAME!;
+
 export type GetMetricsByCodeRequest = {
   code: string;
+  ip: string;
+  fingerprint?: string;
 };
 
 export type GetMetricsByCodeResponse = {
@@ -35,6 +40,12 @@ export const handler = async (
 
   const body: GetMetricsByCodeRequest =
     typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+
+  console.log("[ListMetricsByCode] Parsed request body", {
+    code: body.code,
+    ip: body.ip,
+    fingerprint: body.fingerprint,
+  });
 
   const currentRecord = await getQrCodeDynamo({
     referalCode: body.code,
@@ -57,11 +68,46 @@ export const handler = async (
       code: body.code,
       currentRecord,
     });
+    console.log("[AddMetricsToCode] Updating QR code metrics", {
+      referalCode: body.code,
+      ip: body.ip,
+      fingerprint: body.fingerprint,
+      tableName,
+    });
+    const updatedItem = await updateQrCodeDynamo({
+      referalCode: body.code,
+      ip: body.ip,
+      fingerprint: body.fingerprint,
+      client: dynamoClient,
+      tableName,
+    });
+    console.log("[AddMetricsToCode] QR code metrics updated successfully", {
+      referalCode: body.code,
+      ip: body.ip,
+      totalScans: updatedItem.totalScans,
+      uniqueScans: updatedItem.uniqueScans,
+    });
+
+    const latestLocation = [...updatedItem.splashLocations].sort(
+      (a, b) =>
+        new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime()
+    )[0];
+    const { lat, lon, city, country } = latestLocation;
+
+    await addRippleEvent({
+      code: body.code,
+      lat,
+      lon,
+      location: `${city}, ${country}`,
+      referrer: updatedItem.referrerName,
+      client: dynamoClient,
+    });
+
     return getSuccessResponse({
       success: true,
       message: "Code found",
       registered: true,
-      record: currentRecord,
+      record: updatedItem,
     });
   }
 
