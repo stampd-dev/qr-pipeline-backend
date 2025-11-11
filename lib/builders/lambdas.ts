@@ -78,10 +78,12 @@ export const createLambdas = ({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         IPINFO_TOKEN: environment.ipinfoToken,
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
       },
       permissions: {
         tables: {
           full: [tables.RefererStats],
+          write: [tables.Ripples],
         },
       },
     }),

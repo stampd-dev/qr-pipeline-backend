@@ -1,6 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { updateQrCodeDynamo } from "../../commands/update-qr-code-dynamo";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { addRippleEvent } from "../../commands/add-ripple-event";
+import { SplashLocation } from "../../types/dynamo";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
@@ -46,6 +48,23 @@ export const handler = async (event: any) => {
     ip,
     totalScans: updatedItem.totalScans,
     uniqueScans: updatedItem.uniqueScans,
+  });
+
+  const { splashLocations, referrerName } = updatedItem;
+  const newestLocation = [...splashLocations].sort(
+    (a, b) =>
+      new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime()
+  )[0];
+
+  const { lat, lon, city, country } = newestLocation;
+
+  await addRippleEvent({
+    code: referalCode,
+    lat,
+    lon,
+    location: `${city}, ${country}`,
+    referrer: referrerName,
+    client: dynamoClient,
   });
 
   return {
