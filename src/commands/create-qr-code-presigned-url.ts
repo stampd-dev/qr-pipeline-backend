@@ -12,7 +12,7 @@ export const createQrCodePresignedUrl = async ({
 }) => {
   const command = new GetObjectCommand({
     Bucket: bucketName,
-    Key: `qr-codes/${referalCode}.png`,
+    Key: `raw-codes/${referalCode}.png`,
   });
   const presignedUrl = await getSignedUrl(client, command, {
     expiresIn: 3600,
