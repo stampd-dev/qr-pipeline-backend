@@ -76,7 +76,7 @@ export const updateQrCodeDynamo = async ({
     ...(firstName ? { firstName } : {}),
     ...(lastName ? { lastName } : {}),
     ...(email ? { referrerEmail: email } : {}),
-    ...(phone ? { phone } : {}),
+    ...(phone ? { phoneNumber: phone } : {}),
     ...(nickname ? { referrerName: nickname } : {}),
   };
 

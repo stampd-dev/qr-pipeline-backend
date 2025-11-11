@@ -6,10 +6,14 @@ import {
   getSuccessResponse,
 } from "../../utils/handler-response";
 import { updateQrCodeDynamo } from "../../commands/update-qr-code-dynamo";
+import { addRippleEvent } from "../../commands/add-ripple-event";
+import { createQrCodePresignedUrl } from "../../commands/create-qr-code-presigned-url";
+import { S3Client } from "@aws-sdk/client-s3";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
-
+const s3Client = new S3Client();
+const bucketName = process.env.QR_BATCH_OUTPUT_BUCKET_NAME!;
 interface RegisterCodeBody {
   code: string;
   firstName: string;
@@ -76,11 +80,36 @@ export const handler = async (event: any) => {
 
   console.log("[RegisterCode] Code updated", {
     code: body.code,
-    updatedRecord,
+    updatedRecord: JSON.stringify(updatedRecord, null, 2),
+  });
+
+  const latestLocation = [...updatedRecord.splashLocations].sort(
+    (a, b) =>
+      new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime()
+  )[0];
+
+  const { lat, lon, city, country } = latestLocation;
+
+  await addRippleEvent({
+    code: body.code,
+    lat,
+    lon,
+    location: `${city}, ${country}`,
+    referrer: updatedRecord.referrerName,
+    client: dynamoClient,
+  });
+
+  const qrCodeDownloadUrl = await createQrCodePresignedUrl({
+    referalCode: body.code,
+    client: s3Client,
+    bucketName: bucketName,
   });
 
   return getSuccessResponse({
     success: true,
     message: "Code registered",
+    new_referrer: updatedRecord,
+    qr_code_download_url: qrCodeDownloadUrl,
+    referral_link: `https://main.d19hohaefmsqg9.amplifyapp.com/?ref=${body.code}`,
   });
 };

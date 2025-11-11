@@ -7,10 +7,13 @@ import {
   getErrorResponse,
 } from "../../utils/handler-response";
 import type { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
+import { S3Client } from "@aws-sdk/client-s3";
+import { createQrCodePresignedUrl } from "../../commands/create-qr-code-presigned-url";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
-
+const s3Client = new S3Client();
+const bucketName = process.env.QR_BATCH_OUTPUT_BUCKET_NAME!;
 export type GetMetricsByCodeRequest = {
   code: string;
 };
@@ -20,6 +23,8 @@ export type GetMetricsByCodeResponse = {
   message: string;
   registered: boolean;
   record: RefererStats;
+  qr_code_download_url: string;
+  referral_link: string;
 };
 export const handler = async (
   event: any
@@ -64,11 +69,18 @@ export const handler = async (
     code: body.code,
     currentRecord,
   });
+  const qrCodeDownloadUrl = await createQrCodePresignedUrl({
+    referalCode: body.code,
+    client: s3Client,
+    bucketName: bucketName,
+  });
 
   return getSuccessResponse({
     success: true,
     message: "Code found",
     registered: false,
     record: currentRecord,
+    qr_code_download_url: qrCodeDownloadUrl,
+    referral_link: `https://main.d19hohaefmsqg9.amplifyapp.com/?ref=${body.code}`,
   });
 };

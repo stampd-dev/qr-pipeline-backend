@@ -43,10 +43,16 @@ export const createLambdas = ({
       scope,
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
+        QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
       },
       permissions: {
         tables: {
           full: [tables.RefererStats],
+          write: [tables.Ripples],
+        },
+        buckets: {
+          full: [buckets.QRBatchOutput],
         },
       },
     }),
@@ -60,10 +66,16 @@ export const createLambdas = ({
       scope,
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+        QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
       },
       permissions: {
         tables: {
           full: [tables.RefererStats],
+          write: [tables.Ripples],
+        },
+        buckets: {
+          full: [buckets.QRBatchOutput],
         },
       },
     }),
@@ -90,6 +102,7 @@ export const createLambdas = ({
     GetMetricsByCodeFn: createNodejsFn({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
+        QR_BATCH_OUTPUT_BUCKET_NAME: buckets.QRBatchOutput.bucketName,
       },
       scope,
       id: "QRP-GetMetricsByCode",
@@ -101,6 +114,9 @@ export const createLambdas = ({
       permissions: {
         tables: {
           read: [tables.RefererStats],
+        },
+        buckets: {
+          full: [buckets.QRBatchOutput],
         },
       },
     }),
