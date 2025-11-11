@@ -13,6 +13,12 @@ type UpdateQrCodeDynamoArgs = {
   ip: string;
   /** Optional: injectable clock for tests */
   now?: Date;
+  registered?: boolean;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  nickname?: string;
 };
 
 export const updateQrCodeDynamo = async ({
@@ -21,6 +27,12 @@ export const updateQrCodeDynamo = async ({
   tableName,
   ip,
   now = new Date(),
+  registered = false,
+  firstName = "",
+  lastName = "",
+  email = "",
+  phone = "",
+  nickname = "",
 }: UpdateQrCodeDynamoArgs): Promise<RefererStats> => {
   const existingItem = await getQrCodeDynamo({
     referalCode,
@@ -60,6 +72,12 @@ export const updateQrCodeDynamo = async ({
       [ip]: (ipUsage[ip] || 0) + 1,
     },
     splashLocations,
+    ...(registered ? { registered: true } : {}),
+    ...(firstName ? { firstName } : {}),
+    ...(lastName ? { lastName } : {}),
+    ...(email ? { referrerEmail: email } : {}),
+    ...(phone ? { phone } : {}),
+    ...(nickname ? { referrerName: nickname } : {}),
   };
 
   const command = new PutCommand({
