@@ -27,6 +27,7 @@ export const handler = async (event: any) => {
   const most = await getBiggestSplashers({
     client: dynamoClient,
     tableName,
+    ProjectionExpression: "referrerName, uniqueScans",
   });
 
   console.log("[GetTopCodes] most splashers", {
