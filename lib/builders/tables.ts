@@ -39,6 +39,19 @@ export const createTables = (scope: Construct): QRPTables => {
         sortKey: "SK",
       },
       scope,
+      globalSecondaryIndexes: [
+        {
+          name: "FURTHEST_RIPPLES_INDEX",
+          partitionKey: {
+            name: "PK",
+            type: AttributeType.STRING,
+          },
+          sortKey: {
+            name: "distanceFromOriginal",
+            type: AttributeType.NUMBER,
+          },
+        },
+      ],
     }),
   };
 };

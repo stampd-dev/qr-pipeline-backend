@@ -149,6 +149,7 @@ export const createLambdas = ({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         UNIQUE_SCANS_INDEX_NAME: "UNIQUE_SCANS_INDEX_N",
+        FURTHEST_RIPPLES_INDEX_NAME: "FURTHEST_RIPPLES_INDEX",
       },
       scope,
       id: "QRP-GetTopCodes",
@@ -165,6 +166,10 @@ export const createLambdas = ({
           {
             tableArn: tables.RefererStats.tableArn,
             indexName: "UNIQUE_SCANS_INDEX_N",
+          },
+          {
+            tableArn: tables.RefererStats.tableArn,
+            indexName: "FURTHEST_RIPPLES_INDEX",
           },
         ],
       },
