@@ -51,6 +51,17 @@ export const createTables = (scope: Construct): QRPTables => {
             type: AttributeType.NUMBER,
           },
         },
+        {
+          name: "MOST_RECENT_RIPPLES_INDEX",
+          partitionKey: {
+            name: "PK",
+            type: AttributeType.STRING,
+          },
+          sortKey: {
+            name: "lastSeenAt",
+            type: AttributeType.STRING,
+          },
+        },
       ],
     }),
   };
