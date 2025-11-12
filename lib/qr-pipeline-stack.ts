@@ -19,7 +19,12 @@ export class QrPipelineStack extends cdk.Stack {
     const buckets = createBuckets(this);
     const tables = createTables(this);
     const queues = createQueues(this);
-    const lambdas = createLambdas({ buckets, tables, scope: this, queues });
+    const lambdas = createLambdas({
+      buckets,
+      tables,
+      scope: this,
+      queues,
+    });
     const apis = createApis(this);
     createEndpoints({ lambdas, apis });
   }

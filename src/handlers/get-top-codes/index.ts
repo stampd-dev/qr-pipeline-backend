@@ -1,89 +1,22 @@
-import { SplashLocation } from "../../types/dynamo";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { getBiggestSplashers } from "../../queries/get-biggest-splashers";
 import { getSuccessResponse } from "../../utils/handler-response";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
+const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
 
 type GetTopCodesResponse = {
   success: boolean;
   message: string;
-  mostRipples: {
-    first: {
-      name: string;
-      totalUniqueScans: number;
-    };
-    second: {
-      name: string;
-      totalUniqueScans: number;
-    };
-  };
-  furthestRipples: {
-    first: {
-      name: string;
-      locations: SplashLocation[];
-    };
-    second: {
-      name: string;
-      locations: SplashLocation[];
-    };
-  };
-};
-
-const mockTopCodes: GetTopCodesResponse = {
-  success: true,
-  message: "Top codes fetched successfully",
-  furthestRipples: {
-    first: {
-      name: "Code 1",
-      locations: [
-        {
-          city: "Austin",
-          region: "Texas",
-          country: "US",
-          lat: 30.2672,
-          lon: -97.7431,
-          totalScans: 100,
-          uniqueIps: 100,
-          firstSeenAt: "2025-01-01T00:00:00.000Z",
-          lastSeenAt: "2025-01-01T00:00:00.000Z",
-        },
-        {
-          city: "Los Angeles",
-          region: "California",
-          country: "US",
-          lat: 34.0522,
-          lon: -118.2437,
-          totalScans: 100,
-          uniqueIps: 100,
-          firstSeenAt: "2025-01-01T00:00:00.000Z",
-          lastSeenAt: "2025-01-01T00:00:00.000Z",
-        },
-      ],
-    },
-    second: {
-      name: "Code 2",
-      locations: [
-        {
-          city: "Chicago",
-          region: "Illinois",
-          country: "US",
-          lat: 41.8781,
-          lon: -87.6298,
-          totalScans: 100,
-          uniqueIps: 100,
-          firstSeenAt: "2025-01-01T00:00:00.000Z",
-          lastSeenAt: "2025-01-01T00:00:00.000Z",
-        },
-      ],
-    },
-  },
-  mostRipples: {
-    first: {
-      name: "Code 1",
-      totalUniqueScans: 100,
-    },
-    second: {
-      name: "Code 2",
-      totalUniqueScans: 50,
-    },
-  },
+  furthest: {
+    location: string;
+    referrer: string;
+  }[];
+  most: {
+    referrer: string;
+    totalUniqueScans: number;
+  }[];
 };
 
 export const handler = async (event: any) => {
@@ -91,10 +24,17 @@ export const handler = async (event: any) => {
     event: JSON.stringify(event, null, 2),
   });
 
-  console.log(
-    "[ListAllMetrics] Handler completed (not yet implemented returning mock)",
-    JSON.stringify(mockTopCodes, null, 2)
-  );
+  const most = await getBiggestSplashers({
+    client: dynamoClient,
+    tableName,
+  });
 
-  return getSuccessResponse(mockTopCodes);
+  console.log("[GetTopCodes] most splashers", {
+    most,
+  });
+
+  return getSuccessResponse({
+    furthest: [],
+    most,
+  });
 };

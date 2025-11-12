@@ -6,6 +6,7 @@ import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { handleSqsPermissions, handleStoragePermissions } from "./utils";
 import { Queue } from "aws-cdk-lib/aws-sqs";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export const createNodejsFn = ({
   id,
@@ -38,6 +39,10 @@ export const createNodejsFn = ({
       consume?: Queue;
       send?: Queue;
     };
+    globalSecondaryIndexes?: {
+      tableArn: string;
+      indexName: string;
+    }[];
   };
   needsSharp?: boolean;
 }) => {
@@ -73,6 +78,17 @@ export const createNodejsFn = ({
       }),
     },
   });
+
+  if (permissions.globalSecondaryIndexes) {
+    fn.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["dynamodb:Query"],
+        resources: permissions.globalSecondaryIndexes.map(
+          (index) => `${index.tableArn}/index/${index.indexName}`
+        ),
+      })
+    );
+  }
 
   handleStoragePermissions({ ...permissions, fn });
   handleSqsPermissions({ fn, permissions: permissions.queues });
