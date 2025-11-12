@@ -49,6 +49,11 @@ export const getFurthestRipples = async ({
   }
   const response = await client.send(command);
 
+  console.log(
+    "[GetFurthestRipples] Response items present",
+    response.Items?.slice(0, 25)
+  );
+
   const unformattedResults = response.Items as RippleEvent[];
   const uniqueCodes: {
     distanceFromOriginal: number;
