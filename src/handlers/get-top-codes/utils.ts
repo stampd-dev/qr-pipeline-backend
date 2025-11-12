@@ -35,10 +35,10 @@ console.log(shortenName("Christopher")); // "Christop..."
 
 export const getReferrerName = (referrer: string) => {
   if (!referrer || referrer === "Default Pirate Coin") {
-    return "Noones Ark Organization";
+    return shortenName("Noones Ark Organization");
   }
   if (referrer === "test code") {
-    return "Scootz McGootz";
+    return shortenName("Scootz McGootz");
   }
   return shortenName(referrer);
 };
