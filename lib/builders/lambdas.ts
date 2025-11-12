@@ -144,7 +144,7 @@ export const createLambdas = ({
         globalSecondaryIndexes: [
           {
             tableArn: tables.RefererStats.tableArn,
-            indexName: "UNIQUE_SCANS_INDEX",
+            indexName: "UNIQUE_SCANS_INDEX_N",
           },
         ],
       },
