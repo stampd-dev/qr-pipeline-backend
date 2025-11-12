@@ -13,7 +13,14 @@ export const getFurthestRipples = async ({
   client: DynamoDBDocumentClient;
   tableName: string;
   ProjectionExpression?: string;
-}) => {
+}): Promise<
+  {
+    distanceFromOriginal: number;
+    referrer: string;
+    code: string;
+    location: string;
+  }[]
+> => {
   console.log("[GetFurthestRipples] Getting furthest ripples", {
     tableName,
   });
