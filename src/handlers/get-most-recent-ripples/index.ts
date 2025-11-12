@@ -21,7 +21,7 @@ export const handler = async (event: any) => {
   const ripples = await getMostRecentRipples({
     client: dynamoClient,
     tableName,
-    ProjectionExpression: "location, referrer",
+    ProjectionExpression: "location, referrer, code",
   });
 
   const responseBody: GetMostRecentRipplesResponse = {
