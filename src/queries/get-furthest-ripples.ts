@@ -31,8 +31,12 @@ export const getFurthestRipples = async ({
   const command = new QueryCommand(commandInput);
 
   if (ProjectionExpression?.includes("location")) {
-    commandInput.ProjectionExpression = "#location";
+    commandInput.ProjectionExpression = ProjectionExpression.replace(
+      "location",
+      "#location"
+    );
     commandInput.ExpressionAttributeNames = {
+      ...commandInput.ExpressionAttributeNames,
       "#location": "location",
     };
   }
