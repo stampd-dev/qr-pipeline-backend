@@ -2,7 +2,6 @@ import { getMostRecentRipples } from "../../queries/get-most-recent-ripples";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getSuccessResponse } from "../../utils/handler-response";
-import { RippleEvent } from "../../types/dynamo";
 
 type GetMostRecentRipplesResponse = {
   success: boolean;
