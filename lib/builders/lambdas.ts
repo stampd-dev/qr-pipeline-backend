@@ -19,6 +19,9 @@ export type QRPLambdas = {
   GetTopCodesFn: NodejsFunction;
   RegisterCodeFn: NodejsFunction;
   UpdateCodeMetricsFn: NodejsFunction;
+
+  /** System Updates */
+  BackfillRippleEventsFn: NodejsFunction;
 };
 
 export const createLambdas = ({
@@ -33,6 +36,23 @@ export const createLambdas = ({
   queues: QRPQueues;
 }): QRPLambdas => {
   return {
+    BackfillRippleEventsFn: createNodejsFn({
+      id: "QRP-BackfillRippleEvents",
+      props: {
+        functionName: "QRP-BackfillRippleEvents",
+        handler: "index.handler",
+        entry: "src/handlers/backfill-ripple-events/index.ts",
+      },
+      scope,
+      environment: {
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
+      },
+      permissions: {
+        tables: {
+          full: [tables.Ripples],
+        },
+      },
+    }),
     RegisterCodeFn: createNodejsFn({
       id: "QRP-RegisterCode",
       props: {
