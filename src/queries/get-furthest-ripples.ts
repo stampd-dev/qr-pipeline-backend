@@ -25,7 +25,7 @@ export const getFurthestRipples = async ({
     ExpressionAttributeValues: {
       ":pk": "RIPPLE",
     },
-    Limit: 5,
+    Limit: 100,
     ScanIndexForward: false,
   };
   const command = new QueryCommand(commandInput);
@@ -41,5 +41,24 @@ export const getFurthestRipples = async ({
     };
   }
   const response = await client.send(command);
-  return response.Items as RippleEvent[];
+
+  const unformattedResults = response.Items as RippleEvent[];
+  const uniqueCodes: {
+    distanceFromOriginal: number;
+    referrer: string;
+    code: string;
+    location: string;
+  }[] = [];
+  unformattedResults.forEach((ripple) => {
+    if (!uniqueCodes.some((code) => code.code === ripple.code)) {
+      uniqueCodes.push({
+        distanceFromOriginal: ripple.distanceFromOriginal,
+        referrer: ripple.referrer,
+        code: ripple.code,
+        location: ripple.location,
+      });
+    }
+  });
+
+  return uniqueCodes.slice(0, 5);
 };
