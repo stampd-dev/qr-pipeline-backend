@@ -1,6 +1,6 @@
 import { Construct } from "constructs";
 import { createTable } from "../constructs/table";
-import { Table } from "aws-cdk-lib/aws-dynamodb";
+import { AttributeType, Table } from "aws-cdk-lib/aws-dynamodb";
 
 export type QRPTables = {
   RefererStats: Table;
@@ -20,8 +20,25 @@ export const createTables = (scope: Construct): QRPTables => {
       globalSecondaryIndexes: [
         {
           name: "UNIQUE_SCANS_INDEX",
-          partitionKey: "PK",
-          sortKey: "uniqueScans",
+          partitionKey: {
+            name: "PK",
+            type: AttributeType.STRING,
+          },
+          sortKey: {
+            name: "uniqueScans",
+            type: AttributeType.STRING,
+          },
+        },
+        {
+          name: "UNIQUE_SCANS_INDEX_N",
+          partitionKey: {
+            name: "PK",
+            type: AttributeType.STRING,
+          },
+          sortKey: {
+            name: "uniqueScans",
+            type: AttributeType.NUMBER,
+          },
         },
       ],
     }),

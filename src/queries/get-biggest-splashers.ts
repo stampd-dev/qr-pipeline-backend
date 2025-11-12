@@ -13,7 +13,7 @@ export const getBiggestSplashers = async ({
   });
   const command = new QueryCommand({
     TableName: tableName,
-    IndexName: "UNIQUE_SCANS_INDEX",
+    IndexName: "UNIQUE_SCANS_INDEX_N",
     KeyConditionExpression: "PK = :pk",
     ExpressionAttributeValues: {
       ":pk": "REFERER",

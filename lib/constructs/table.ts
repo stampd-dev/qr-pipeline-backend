@@ -16,8 +16,14 @@ export const createTable = ({
   };
   globalSecondaryIndexes?: {
     name: string;
-    partitionKey: string;
-    sortKey?: string;
+    partitionKey: {
+      name: string;
+      type: cdk.aws_dynamodb.AttributeType;
+    };
+    sortKey?: {
+      name: string;
+      type: cdk.aws_dynamodb.AttributeType;
+    };
   }[];
 }) => {
   const { tableName, partitionKey, sortKey } = props;
@@ -43,19 +49,8 @@ export const createTable = ({
     globalSecondaryIndexes.forEach((index) => {
       table.addGlobalSecondaryIndex({
         indexName: index.name,
-        partitionKey: {
-          name: index.partitionKey,
-          type: cdk.aws_dynamodb.AttributeType.STRING,
-        },
-        sortKey: index.sortKey
-          ? {
-              name: index.sortKey,
-              type:
-                index.sortKey === "uniqueScans"
-                  ? cdk.aws_dynamodb.AttributeType.NUMBER
-                  : cdk.aws_dynamodb.AttributeType.STRING,
-            }
-          : undefined,
+        partitionKey: index.partitionKey,
+        sortKey: index.sortKey,
       });
     });
   }
