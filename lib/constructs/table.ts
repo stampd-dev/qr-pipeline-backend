@@ -5,6 +5,7 @@ export const createTable = ({
   id,
   props,
   scope,
+  globalSecondaryIndexes,
 }: {
   scope: Construct;
   id: string;
@@ -13,9 +14,14 @@ export const createTable = ({
     partitionKey: string;
     sortKey?: string;
   };
+  globalSecondaryIndexes?: {
+    name: string;
+    partitionKey: string;
+    sortKey?: string;
+  }[];
 }) => {
   const { tableName, partitionKey, sortKey } = props;
-  return new cdk.aws_dynamodb.Table(scope, id, {
+  const table = new cdk.aws_dynamodb.Table(scope, id, {
     tableName,
     billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
     removalPolicy: cdk.RemovalPolicy.RETAIN,
@@ -32,4 +38,24 @@ export const createTable = ({
         }
       : undefined,
   });
+
+  if (globalSecondaryIndexes) {
+    globalSecondaryIndexes.forEach((index) => {
+      table.addGlobalSecondaryIndex({
+        indexName: index.name,
+        partitionKey: {
+          name: index.partitionKey,
+          type: cdk.aws_dynamodb.AttributeType.STRING,
+        },
+        sortKey: index.sortKey
+          ? {
+              name: index.sortKey,
+              type: cdk.aws_dynamodb.AttributeType.STRING,
+            }
+          : undefined,
+      });
+    });
+  }
+
+  return table;
 };

@@ -17,6 +17,13 @@ export const createTables = (scope: Construct): QRPTables => {
         sortKey: "SK",
       },
       scope,
+      globalSecondaryIndexes: [
+        {
+          name: "UNIQUE_SCANS_INDEX",
+          partitionKey: "PK",
+          sortKey: "uniqueScans",
+        },
+      ],
     }),
     Ripples: createTable({
       id: "QRP-Ripples",
