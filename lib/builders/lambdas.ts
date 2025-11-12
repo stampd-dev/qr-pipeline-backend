@@ -150,6 +150,7 @@ export const createLambdas = ({
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
         UNIQUE_SCANS_INDEX_NAME: "UNIQUE_SCANS_INDEX_N",
         FURTHEST_RIPPLES_INDEX_NAME: "FURTHEST_RIPPLES_INDEX",
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
       },
       scope,
       id: "QRP-GetTopCodes",
@@ -160,7 +161,7 @@ export const createLambdas = ({
       },
       permissions: {
         tables: {
-          read: [tables.RefererStats],
+          read: [tables.RefererStats, tables.Ripples],
         },
         globalSecondaryIndexes: [
           {
