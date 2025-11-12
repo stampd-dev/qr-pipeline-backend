@@ -13,6 +13,7 @@ export type QRPEndpoints = {
   PublicMetrics: {
     GetTopCodesEndpoint: HttpRoute[];
     GetMetricsByCodeEndpoint: HttpRoute[];
+    GetMostRecentRipplesEndpoint: HttpRoute[];
   };
 };
 
@@ -73,6 +74,14 @@ export const createEndpoints = ({
           path: "/public-metrics/get-top-codes",
           methods: [HttpMethod.GET],
           handler: lambdas.GetTopCodesFn,
+        },
+      }),
+      GetMostRecentRipplesEndpoint: createEndpoint({
+        api: apis.PublicMetricsApi,
+        props: {
+          path: "/public-metrics/get-most-recent-ripples",
+          methods: [HttpMethod.GET],
+          handler: lambdas.GetMostRecentRipplesFn,
         },
       }),
     },

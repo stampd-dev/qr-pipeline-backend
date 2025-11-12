@@ -19,6 +19,7 @@ export type QRPLambdas = {
   GetTopCodesFn: NodejsFunction;
   RegisterCodeFn: NodejsFunction;
   UpdateCodeMetricsFn: NodejsFunction;
+  GetMostRecentRipplesFn: NodejsFunction;
 
   /** System Updates */
   BackfillRippleEventsFn: NodejsFunction;
@@ -36,6 +37,30 @@ export const createLambdas = ({
   queues: QRPQueues;
 }): QRPLambdas => {
   return {
+    GetMostRecentRipplesFn: createNodejsFn({
+      id: "QRP-GetMostRecentRipples",
+      props: {
+        functionName: "QRP-GetMostRecentRipples",
+        handler: "index.handler",
+        entry: "src/handlers/get-most-recent-ripples/index.ts",
+      },
+      scope,
+      environment: {
+        RIPPLES_TABLE_NAME: tables.Ripples.tableName,
+        MOST_RECENT_RIPPLES_INDEX_NAME: "MOST_RECENT_RIPPLES_INDEX",
+      },
+      permissions: {
+        tables: {
+          read: [tables.Ripples],
+        },
+        globalSecondaryIndexes: [
+          {
+            tableArn: tables.Ripples.tableArn,
+            indexName: "MOST_RECENT_RIPPLES_INDEX",
+          },
+        ],
+      },
+    }),
     BackfillRippleEventsFn: createNodejsFn({
       id: "QRP-BackfillRippleEvents",
       props: {
