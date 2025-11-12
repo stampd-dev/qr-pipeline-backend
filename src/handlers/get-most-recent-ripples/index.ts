@@ -2,7 +2,7 @@ import { getMostRecentRipples } from "../../queries/get-most-recent-ripples";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getSuccessResponse } from "../../utils/handler-response";
-import { RippleEvent } from "../../types/dynamo";
+import { getReferrerName } from "../get-top-codes/utils";
 
 type GetMostRecentRipplesResponse = {
   success: boolean;
@@ -29,7 +29,7 @@ export const handler = async (event: any) => {
     message: "Most recent ripples fetched successfully",
     ripples: ripples.map((ripple) => ({
       location: ripple.location,
-      referrer: ripple.referrer,
+      referrer: getReferrerName(ripple.referrer),
     })),
   };
   console.log("[GetMostRecentRipples]", responseBody);
