@@ -141,12 +141,12 @@ export const createLambdas = ({
         tables: {
           read: [tables.RefererStats],
         },
-        globalSecondaryIndexes: [
-          {
-            tableArn: tables.RefererStats.tableArn,
-            indexName: "UNIQUE_SCANS_INDEX_N",
-          },
-        ],
+        // globalSecondaryIndexes: [
+        //   {
+        //     tableArn: tables.RefererStats.tableArn,
+        //     indexName: "UNIQUE_SCANS_INDEX_N",
+        //   },
+        // ],
       },
     }),
     CreateBatchesFromInputFn: createNodejsFn({
