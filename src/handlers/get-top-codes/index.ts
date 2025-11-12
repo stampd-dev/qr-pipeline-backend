@@ -13,6 +13,7 @@ type GetTopCodesResponse = {
   furthest: {
     location: string;
     referrer: string;
+    distanceFromOriginal: number;
   }[];
   most: {
     referrer: string;
@@ -37,14 +38,15 @@ export const handler = async (event: any) => {
     ProjectionExpression: "referrer, distanceFromOriginal",
   });
 
-  console.log("[GetTopCodes] most splashers", {
-    most,
-    furthest,
-  });
-
-  return getSuccessResponse({
-    most,
+  const responseBody: GetTopCodesResponse = {
+    message: "Top codes fetched successfully",
+    success: true,
+    most: most.map((referrer) => ({
+      referrer: referrer.referrerName,
+      totalUniqueScans: referrer.uniqueScans,
+    })),
     furthest: furthest.map((ripple) => ({
+      location: ripple.location,
       referrer:
         ripple.referrer === "Default Pirate Coin"
           ? "Noones Ark Organization"
@@ -53,5 +55,9 @@ export const handler = async (event: any) => {
           : ripple.referrer,
       distanceFromOriginal: ripple.distanceFromOriginal,
     })),
-  });
+  };
+
+  console.log("[GetTopCodes]", responseBody);
+
+  return getSuccessResponse(responseBody);
 };
