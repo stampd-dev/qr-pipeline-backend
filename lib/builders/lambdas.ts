@@ -128,7 +128,7 @@ export const createLambdas = ({
     GetTopCodesFn: createNodejsFn({
       environment: {
         REFERRER_STATS_TABLE_NAME: tables.RefererStats.tableName,
-        UNIQUE_SCANS_INDEX_NAME: "UNIQUE_SCANS_INDEX",
+        UNIQUE_SCANS_INDEX_NAME: "UNIQUE_SCANS_INDEX_N",
       },
       scope,
       id: "QRP-GetTopCodes",
@@ -141,12 +141,12 @@ export const createLambdas = ({
         tables: {
           read: [tables.RefererStats],
         },
-        // globalSecondaryIndexes: [
-        //   {
-        //     tableArn: tables.RefererStats.tableArn,
-        //     indexName: "UNIQUE_SCANS_INDEX_N",
-        //   },
-        // ],
+        globalSecondaryIndexes: [
+          {
+            tableArn: tables.RefererStats.tableArn,
+            indexName: "UNIQUE_SCANS_INDEX_N",
+          },
+        ],
       },
     }),
     CreateBatchesFromInputFn: createNodejsFn({
