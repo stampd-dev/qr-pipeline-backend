@@ -24,9 +24,15 @@ export const handler = async (event: any) => {
     ProjectionExpression: "location, referrer",
   });
 
-  return getSuccessResponse({
+  const responseBody: GetMostRecentRipplesResponse = {
     success: true,
     message: "Most recent ripples fetched successfully",
-    ripples,
-  });
+    ripples: ripples.map((ripple) => ({
+      location: ripple.location,
+      referrer: ripple.referrer,
+    })),
+  };
+  console.log("[GetMostRecentRipples]", responseBody);
+
+  return getSuccessResponse(responseBody);
 };
