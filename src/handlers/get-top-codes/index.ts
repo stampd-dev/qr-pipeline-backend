@@ -3,6 +3,7 @@ import { getBiggestSplashers } from "../../queries/get-biggest-splashers";
 import { getSuccessResponse } from "../../utils/handler-response";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getFurthestRipples } from "../../queries/get-furthest-ripples";
+import { getReferrerName } from "./utils";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
@@ -42,17 +43,12 @@ export const handler = async (event: any) => {
     message: "Top codes fetched successfully",
     success: true,
     most: most.map((referrer) => ({
-      referrer: referrer.referrerName,
+      referrer: getReferrerName(referrer.referrerName),
       totalUniqueScans: referrer.uniqueScans,
     })),
     furthest: furthest.map((ripple) => ({
       location: ripple.location,
-      referrer:
-        ripple.referrer === "Default Pirate Coin"
-          ? "Noones Ark Organization"
-          : ripple.referrer === "test code"
-          ? "Scootz McGootz"
-          : ripple.referrer,
+      referrer: getReferrerName(ripple.referrer),
       distanceFromOriginal: ripple.distanceFromOriginal,
     })),
   };
