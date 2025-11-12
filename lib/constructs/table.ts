@@ -34,7 +34,10 @@ export const createTable = ({
     sortKey: sortKey
       ? {
           name: sortKey,
-          type: cdk.aws_dynamodb.AttributeType.STRING,
+          type:
+            sortKey === "uniqueScans"
+              ? cdk.aws_dynamodb.AttributeType.NUMBER
+              : cdk.aws_dynamodb.AttributeType.STRING,
         }
       : undefined,
   });

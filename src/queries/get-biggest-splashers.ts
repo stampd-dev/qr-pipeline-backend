@@ -8,6 +8,9 @@ export const getBiggestSplashers = async ({
   client: DynamoDBDocumentClient;
   tableName: string;
 }) => {
+  console.log("[GetBiggestSplashers] Getting biggest splashers", {
+    tableName,
+  });
   const command = new QueryCommand({
     TableName: tableName,
     IndexName: "UNIQUE_SCANS_INDEX",
