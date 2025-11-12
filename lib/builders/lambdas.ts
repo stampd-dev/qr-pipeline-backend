@@ -169,7 +169,7 @@ export const createLambdas = ({
             indexName: "UNIQUE_SCANS_INDEX_N",
           },
           {
-            tableArn: tables.RefererStats.tableArn,
+            tableArn: tables.Ripples.tableArn,
             indexName: "FURTHEST_RIPPLES_INDEX",
           },
         ],
