@@ -54,7 +54,7 @@ export const getMostRecentRipples = async ({
     }
   });
 
-  const formattedResults = uniqueCodes.map((code) => ({
+  const formattedResults = uniqueCodes.slice(0, 5).map((code) => ({
     location: code.location,
     referrer: getReferrerName(code.referrer),
     code: code.code,
