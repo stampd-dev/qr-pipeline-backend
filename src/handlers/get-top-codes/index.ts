@@ -35,7 +35,7 @@ export const handler = async (event: any) => {
   const furthest = await getFurthestRipples({
     client: dynamoClient,
     tableName: process.env.RIPPLES_TABLE_NAME!,
-    ProjectionExpression: "referrer, distanceFromOriginal",
+    ProjectionExpression: "referrer, distanceFromOriginal, location",
   });
 
   const responseBody: GetTopCodesResponse = {
