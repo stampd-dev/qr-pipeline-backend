@@ -35,3 +35,16 @@ export type RefererStats = {
   kickstarterUrl: string;
   registered?: boolean;
 };
+
+export type RippleEvent = {
+  PK: string; // RIPPLE
+  SK: string; // timestamp
+  code: string;
+  lat: number;
+  lon: number;
+  location: string;
+  referrer: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  distanceFromOriginal: number;
+};
