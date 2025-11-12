@@ -18,28 +18,28 @@ export const createTables = (scope: Construct): QRPTables => {
       },
       scope,
       globalSecondaryIndexes: [
-        {
-          name: "UNIQUE_SCANS_INDEX",
-          partitionKey: {
-            name: "PK",
-            type: AttributeType.STRING,
-          },
-          sortKey: {
-            name: "uniqueScans",
-            type: AttributeType.STRING,
-          },
-        },
-        {
-          name: "UNIQUE_SCANS_INDEX_N",
-          partitionKey: {
-            name: "PK",
-            type: AttributeType.STRING,
-          },
-          sortKey: {
-            name: "uniqueScans",
-            type: AttributeType.NUMBER,
-          },
-        },
+        // {
+        //   name: "UNIQUE_SCANS_INDEX",
+        //   partitionKey: {
+        //     name: "PK",
+        //     type: AttributeType.STRING,
+        //   },
+        //   sortKey: {
+        //     name: "uniqueScans",
+        //     type: AttributeType.STRING,
+        //   },
+        // },
+        // {
+        //   name: "UNIQUE_SCANS_INDEX_N",
+        //   partitionKey: {
+        //     name: "PK",
+        //     type: AttributeType.STRING,
+        //   },
+        //   sortKey: {
+        //     name: "uniqueScans",
+        //     type: AttributeType.NUMBER,
+        //   },
+        // },
       ],
     }),
     Ripples: createTable({
