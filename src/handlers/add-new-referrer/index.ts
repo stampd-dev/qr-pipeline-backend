@@ -74,6 +74,7 @@ export const handler = async (event: any) => {
     location: `${city}, ${country}`,
     referrer: updatedRecord.referrerName,
     client: dynamoClient,
+    distanceFromOriginal: 0,
   });
 
   const qrCodeDownloadUrl = await createQrCodePresignedUrl({

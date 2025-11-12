@@ -1,4 +1,10 @@
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { calculateDistance } from "../utils/calculate-distance";
+
+const originalLocation = {
+  lat: 40.699561,
+  lon: -73.974303,
+};
 
 interface AddRippleEventArgs {
   code: string;
@@ -11,6 +17,7 @@ interface AddRippleEventArgs {
   referrer: string;
 
   client: DynamoDBDocumentClient;
+  distanceFromOriginal: number;
 }
 
 export const addRippleEvent = async ({
@@ -21,6 +28,10 @@ export const addRippleEvent = async ({
   referrer,
   client,
 }: AddRippleEventArgs) => {
+  const distanceFromOriginal = calculateDistance(originalLocation, {
+    lat,
+    lon,
+  });
   const Item = {
     PK: `RIPPLE`,
     SK: `${Date.now()}`,
@@ -31,6 +42,7 @@ export const addRippleEvent = async ({
     referrer,
     firstSeenAt: new Date().toISOString(),
     lastSeenAt: new Date().toISOString(),
+    distanceFromOriginal,
   };
 
   const command = new PutCommand({

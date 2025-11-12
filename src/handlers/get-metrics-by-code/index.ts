@@ -11,11 +11,17 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { createQrCodePresignedUrl } from "../../commands/create-qr-code-presigned-url";
 import { addRippleEvent } from "../../commands/add-ripple-event";
 import { updateQrCodeDynamo } from "../../commands/update-qr-code-dynamo";
+import { calculateDistance } from "../../utils/calculate-distance";
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
 const s3Client = new S3Client();
 const bucketName = process.env.QR_BATCH_OUTPUT_BUCKET_NAME!;
+
+const originalLocation = {
+  lat: 40.699561,
+  lon: -73.974303,
+};
 
 export type GetMetricsByCodeRequest = {
   code: string;
@@ -94,6 +100,11 @@ export const handler = async (
     )[0];
     const { lat, lon, city, country } = latestLocation;
 
+    const distanceFromOriginal = calculateDistance(originalLocation, {
+      lat,
+      lon,
+    });
+
     await addRippleEvent({
       code: body.code,
       lat,
@@ -101,6 +112,7 @@ export const handler = async (
       location: `${city}, ${country}`,
       referrer: updatedItem.referrerName,
       client: dynamoClient,
+      distanceFromOriginal,
     });
 
     const qrCodeDownloadUrl = await createQrCodePresignedUrl({
