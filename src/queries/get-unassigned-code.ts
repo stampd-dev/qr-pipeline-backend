@@ -22,7 +22,7 @@ export const getUnassignedCode = async ({
     },
     FilterExpression:
       "(attribute_not_exists(registered) OR registered = :registered) AND referrerName = :referrerName AND virtualOnly = :virtualOnly",
-    Limit: 1,
+    Limit: 50,
   };
 
   console.log("[GetUnassignedCode] Query params", { QueryParams });
