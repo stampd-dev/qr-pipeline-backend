@@ -15,8 +15,8 @@ const tableName = process.env.REFERRER_STATS_TABLE_NAME!;
 const s3Client = new S3Client();
 const bucketName = process.env.QR_BATCH_OUTPUT_BUCKET_NAME!;
 interface AddNewReferrerBody {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   nickname: string; //calc as first name + last name from form
@@ -52,11 +52,11 @@ export const handler = async (event: any) => {
     tableName,
     ip: body.ip,
     registered: true,
-    firstName: body.firstName,
-    lastName: body.lastName,
+    firstName: body.first_name,
+    lastName: body.last_name,
     email: body.email,
     phone: body.phone,
-    nickname: body.nickname,
+    nickname: body.first_name + " " + body.last_name,
   });
 
   const latestLocation = [...updatedRecord.splashLocations].sort(
