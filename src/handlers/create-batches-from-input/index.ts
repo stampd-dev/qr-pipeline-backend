@@ -22,10 +22,13 @@ export const handler = async (event: any) => {
     bucketName,
   });
 
-  const { key } =
+  const { key, virtualOnly } =
     typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
-  console.log("[CreateBatchesFromInput] Parsed request body", { key });
+  console.log("[CreateBatchesFromInput] Parsed request body", {
+    key,
+    virtualOnly,
+  });
 
   if (!key) {
     console.error("[CreateBatchesFromInput] Missing 'key' in request body");
@@ -166,6 +169,7 @@ export const handler = async (event: any) => {
     await sendBatchToQueue({
       batchId: newBatch.batchId,
       queueUrl: processBatchQueueUrl,
+      virtualOnly,
     });
     console.log("[CreateBatchesFromInput] Sent batch to queue", {
       batchId: newBatch.batchId,

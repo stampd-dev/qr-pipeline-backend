@@ -34,6 +34,7 @@ export type RefererStats = {
   coinNumber: string;
   kickstarterUrl: string;
   registered?: boolean;
+  virtualOnly?: boolean;
 };
 
 export type RippleEvent = {

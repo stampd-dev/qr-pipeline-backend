@@ -11,6 +11,7 @@ export const createApis = (scope: Construct) => {
   return {
     AdminApi: createApi(scope, "QRP-AdminApi", {
       apiName: "QRP-AdminApi",
+      
     }),
     PublicMetricsApi: createApi(scope, "QRP-PublicMetricsApi", {
       apiName: "QRP-PublicMetricsApi",

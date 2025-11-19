@@ -16,12 +16,12 @@ export const generateAndUploadQrCode = async ({
   referalCode,
   client,
   bucketName,
-  batchId,
+  virtualOnly,
 }: {
   referalCode: string;
   client: S3Client;
   bucketName: string;
-  batchId: string;
+  virtualOnly: boolean;
 }) => {
   const url = `https://main.d19hohaefmsqg9.amplifyapp.com/?ref=${referalCode}`;
 
@@ -84,7 +84,9 @@ export const generateAndUploadQrCode = async ({
   await client.send(
     new PutObjectCommand({
       Bucket: bucketName,
-      Key: `qr-codes/batch-${batchId}/${referalCode}.png`,
+      Key: virtualOnly
+        ? `virtual-codes/${referalCode}.png`
+        : `raw-codes/${referalCode}.png`,
       Body: finalImage,
       ContentType: "image/png",
     })
