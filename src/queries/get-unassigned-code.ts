@@ -1,4 +1,8 @@
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+  QueryCommandInput,
+} from "@aws-sdk/lib-dynamodb";
 
 export const getUnassignedCode = async ({
   client,
@@ -7,7 +11,7 @@ export const getUnassignedCode = async ({
   client: DynamoDBDocumentClient;
   tableName: string;
 }) => {
-  const command = new QueryCommand({
+  const QueryParams: QueryCommandInput = {
     TableName: tableName,
     KeyConditionExpression: "PK = :pk",
     ExpressionAttributeValues: {
@@ -17,10 +21,13 @@ export const getUnassignedCode = async ({
       ":virtualOnly": true,
     },
     FilterExpression:
-      "registered = :registered AND referrerName = :referrerName AND virtualOnly = :virtualOnly",
+      "(attribute_not_exists(registered) OR registered = :registered) AND referrerName = :referrerName AND virtualOnly = :virtualOnly",
     Limit: 1,
-    ProjectionExpression: "referalCode",
-  });
+  };
+
+  console.log("[GetUnassignedCode] Query params", { QueryParams });
+  const command = new QueryCommand(QueryParams);
   const response = await client.send(command);
+  console.log("[GetUnassignedCode] Response", { response });
   return response.Items?.[0]?.referalCode as string | undefined;
 };
