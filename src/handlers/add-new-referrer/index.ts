@@ -31,6 +31,16 @@ export const handler = async (event: any) => {
   const body: AddNewReferrerBody =
     typeof event.body === "string" ? JSON.parse(event.body) : event.body;
 
+  console.log("[AddNewReferrer] Parsed request body", { body });
+
+  if (!body.first_name || !body.last_name || !body.email || !body.phone) {
+    console.error("[AddNewReferrer] Missing required fields");
+    return getErrorResponse({
+      statusCode: 400,
+      body: { error: "Missing required fields" },
+    });
+  }
+
   const unassignedCode = await getUnassignedCode({
     client: dynamoClient,
     tableName,
