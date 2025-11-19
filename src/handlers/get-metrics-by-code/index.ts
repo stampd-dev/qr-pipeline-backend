@@ -119,6 +119,7 @@ export const handler = async (
       referalCode: body.code,
       client: s3Client,
       bucketName: bucketName,
+      virtualOnly: currentRecord.virtualOnly ?? false,
     });
 
     return getSuccessResponse({
@@ -139,6 +140,7 @@ export const handler = async (
     referalCode: body.code,
     client: s3Client,
     bucketName: bucketName,
+    virtualOnly: currentRecord.virtualOnly ?? false,
   });
 
   return getSuccessResponse({

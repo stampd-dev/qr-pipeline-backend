@@ -118,6 +118,7 @@ export const handler = async (event: any) => {
     referalCode: body.code,
     client: s3Client,
     bucketName: bucketName,
+    virtualOnly: currentRecord.virtualOnly ?? false,
   });
 
   return getSuccessResponse({
