@@ -5,14 +5,18 @@ export const createQrCodePresignedUrl = async ({
   referalCode,
   client,
   bucketName,
+  virtualOnly,
 }: {
   referalCode: string;
   client: S3Client;
   bucketName: string;
+  virtualOnly: boolean;
 }) => {
   const command = new GetObjectCommand({
     Bucket: bucketName,
-    Key: `raw-codes/${referalCode}.png`,
+    Key: virtualOnly
+      ? `virtual-codes/${referalCode}.png`
+      : `raw-codes/${referalCode}.png`,
   });
   const presignedUrl = await getSignedUrl(client, command, {
     expiresIn: 3600,

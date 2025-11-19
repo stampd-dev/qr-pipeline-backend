@@ -14,9 +14,10 @@ export const getUnassignedCode = async ({
       ":pk": "REFERER",
       ":registered": false,
       ":referrerName": "unassigned",
+      ":virtualOnly": true,
     },
     FilterExpression:
-      "registered = :registered AND referrerName = :referrerName",
+      "registered = :registered AND referrerName = :referrerName AND virtualOnly = :virtualOnly",
     Limit: 1,
     ProjectionExpression: "referalCode",
   });
