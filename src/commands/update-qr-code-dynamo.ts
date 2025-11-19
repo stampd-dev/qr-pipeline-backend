@@ -66,7 +66,7 @@ export const updateQrCodeDynamo = async ({
     ? isUniqueFingerprint
     : isUniqueIp;
 
-  if (shouldUpdateSplashLocation && ip && fingerprint) {
+  if (shouldUpdateSplashLocation && ip && fingerprint && ip !== "unknown") {
     console.log("[UpdateQrCodeDynamo] Updating splash location", {
       fingerprint,
       ip,
