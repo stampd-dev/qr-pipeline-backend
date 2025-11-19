@@ -14,14 +14,19 @@ type SQSEvent = {
     body: string;
     messageId: string;
     receiptHandle: string;
+    virtualOnly: boolean;
   }>;
 };
 
 type QueueMessage = {
   batchId: string;
+  virtualOnly: boolean;
 };
 
-const processBatch = async (batchId: string): Promise<void> => {
+const processBatch = async (
+  batchId: string,
+  virtualOnly: boolean
+): Promise<void> => {
   console.log("[ProcessQRBatch] Starting batch processing", {
     batchId,
     bucketName,
@@ -163,6 +168,7 @@ const processBatch = async (batchId: string): Promise<void> => {
         referrerTag: (kickstarter_tag || "").trim(),
         coinNumber: (coin_number || "").trim(),
         kickstarterUrl: (kick_starter_url || "").trim(),
+        virtualOnly,
       });
       console.log("[ProcessQRBatch] DynamoDB record created", {
         batchId,
@@ -178,7 +184,7 @@ const processBatch = async (batchId: string): Promise<void> => {
         referalCode,
         client: s3Client,
         bucketName: process.env.QR_BATCH_OUTPUT_BUCKET_NAME!,
-        batchId,
+        virtualOnly,
       });
       console.log("[ProcessQRBatch] QR code generated and uploaded", {
         batchId,
@@ -246,7 +252,7 @@ export const handler = async (
           message,
         });
 
-        const { batchId } = message;
+        const { batchId, virtualOnly } = message;
 
         if (!batchId) {
           console.error("[ProcessQRBatch] Missing batchId in message", {
@@ -263,7 +269,7 @@ export const handler = async (
           messageId: record.messageId,
           batchId,
         });
-        await processBatch(batchId);
+        await processBatch(batchId, virtualOnly);
         console.log("[ProcessQRBatch] Successfully processed batch", {
           messageId: record.messageId,
           batchId,

@@ -28,6 +28,7 @@ export const createQrCodeDynamo = async ({
   referrerTag,
   coinNumber,
   kickstarterUrl,
+  virtualOnly,
 }: {
   referalCode: string;
   client: DynamoDBDocumentClient;
@@ -40,6 +41,7 @@ export const createQrCodeDynamo = async ({
   referrerTag: string;
   coinNumber: string;
   kickstarterUrl: string;
+  virtualOnly: boolean;
 }) => {
   const Item: RefererStats = {
     PK: `REFERER`,
@@ -60,6 +62,7 @@ export const createQrCodeDynamo = async ({
     coinNumber,
     kickstarterUrl,
     splashLocations: [defaultSplashLocation],
+    virtualOnly,
   };
 
   const command = new PutCommand({

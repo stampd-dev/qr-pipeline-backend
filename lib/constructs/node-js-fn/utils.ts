@@ -80,6 +80,10 @@ export const handleStoragePermissions = ({
     write?: Bucket[];
     full?: Bucket[];
   };
+  globalSecondaryIndexes?: {
+    tableArn: string;
+    indexName: string;
+  }[];
 }) => {
   if (tables) {
     handleDynamoDBPermissions({ fn, permissions: tables });
