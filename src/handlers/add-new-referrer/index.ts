@@ -19,8 +19,8 @@ interface AddNewReferrerBody {
   last_name: string;
   email: string;
   phone: string;
-  nickname: string; //calc as first name + last name from form
   ip: string;
+  fingerprint: string;
 }
 
 export const handler = async (event: any) => {
@@ -61,6 +61,7 @@ export const handler = async (event: any) => {
     referalCode: unassignedCode,
     tableName,
     ip: body.ip,
+    fingerprint: body.fingerprint,
     registered: true,
     firstName: body.first_name,
     lastName: body.last_name,
